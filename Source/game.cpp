@@ -11,30 +11,6 @@
 //TODO : Alot of magic numbers
 //TODO : No const correctness
 
-// MATH FUNCTIONS
-//TODO : Move to a separate math utility file
-//TODO : Add const correctness
-//TODO : Use std prefix for functions like pow and sqrtf
-float lineLength(Vector2 A, Vector2 B) //Uses pythagoras to calculate the length of a line
-{
-	float length = sqrtf(powf(B.x - A.x, 2) + powf(B.y - A.y, 2));
-
-	return length;
-}
-
-bool pointInCircle(Vector2 circlePos, float radius, Vector2 point) // Uses pythagoras to calculate if a point is within a circle or not
-{
-	float distanceToCentre = lineLength(circlePos, point);
-
-	if (distanceToCentre < radius)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 Game::Game() : resources()
 {
 	gameState = State::STARTSCREEN;
@@ -150,7 +126,7 @@ void Game::Update()
 		// Update background with offset
 		playerPos = { player.x_pos, GameConstants::Player::BASE_HEIGHT };
 		cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
-		offset = lineLength(playerPos, cornerPos) * -1;
+		offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
 		background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
 
 		//TODO: Extract function
@@ -175,7 +151,7 @@ void Game::Update()
 			{
 				for (int a = 0; a < Aliens.size(); a++)
 				{
-					if (CheckCollision(Aliens[a].position, GameConstants::Alien::RADIUS, Projectiles[i].lineStart, Projectiles[i].lineEnd))
+					if (CollisionSystem::CheckCollision(Aliens[a].position, GameConstants::Alien::RADIUS, Projectiles[i].lineStart, Projectiles[i].lineEnd))
 					{
 						// Kill!
 						std::cout << "Hit! \n";
@@ -193,7 +169,7 @@ void Game::Update()
 			{
 				if (Projectiles[j].type == EntityType::ENEMY_PROJECTILE)
 				{
-					if (CheckCollision({ player.x_pos, GetScreenHeight() - GameConstants::Player::BASE_HEIGHT }, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
+					if (CollisionSystem::CheckCollision({player.x_pos, GetScreenHeight() - GameConstants::Player::BASE_HEIGHT}, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
 					{
 						std::cout << "dead!\n";
 						Projectiles[j].active = false;
@@ -205,7 +181,7 @@ void Game::Update()
 
 			for (int b = 0; b < Walls.size(); b++)
 			{
-				if (CheckCollision(Walls[b].position, GameConstants::Wall::RADIUS, Projectiles[i].lineStart, Projectiles[i].lineEnd))
+				if (CollisionSystem::CheckCollision(Walls[b].position, GameConstants::Wall::RADIUS, Projectiles[i].lineStart, Projectiles[i].lineEnd))
 				{
 					// Kill!
 					std::cout << "Hit! \n";
@@ -588,72 +564,6 @@ void Game::SaveLeaderboard()
 	// WRITE ARRAY DATA INTO FILE
 
 	// CLOSE FILE
-}
-
-
-bool Game::CheckCollision(Vector2 circlePos, float circleRadius, Vector2 lineStart, Vector2 lineEnd)
-{
-	// our objective is to calculate the distance between the closest point of the line to the centre of the circle, 
-	// and determine if it is shorter than the radius.
-
-	// check if either edge of line is within circle
-	if (pointInCircle(circlePos, circleRadius, lineStart) || pointInCircle(circlePos, circleRadius, lineEnd))
-	{
-		return true;
-	}
-	//TODO : To many parameters 
-	// simplify variables
-	Vector2 A = lineStart;
-	Vector2 B = lineEnd;
-	Vector2 C = circlePos;
-
-	// calculate the length of the line
-	float length = lineLength(A, B);
-
-	// calculate the dot product
-	float dotP = (((C.x - A.x) * (B.x - A.x)) + ((C.y - A.y) * (B.y - A.y))) / powf(length, 2);
-
-	// use dot product to find closest point
-	float closestX = A.x + (dotP * (B.x - A.x));
-	float closestY = A.y + (dotP * (B.y - A.y));
-
-	//find out if coordinates are on the line.
-	// we do this by comparing the distance of the dot to the edges, with two vectors
-	// if the distance of the vectors combined is the same as the length the point is on the line
-
-	//since we are using floating points, we will allow the distance to be slightly innaccurate to create a smoother collision
-	float buffer = GameConstants::Physics::Collision::BUFFER;
-
-	float closeToStart = lineLength(A, { closestX, closestY }); //closestX + Y compared to line Start
-	float closeToEnd = lineLength(B, { closestX, closestY });	//closestX + Y compared to line End
-
-	float closestLength = closeToStart + closeToEnd;
-
-	if (closestLength == length + buffer || closestLength == length - buffer)
-	{
-		//Point is on the line!
-
-		//Compare length between closest point and circle centre with circle radius
-
-		float closeToCentre = lineLength(A, { closestX, closestY }); //closestX + Y compared to circle centre
-
-		if (closeToCentre < circleRadius)
-		{
-			//Line is colliding with circle!
-			return true;
-		}
-		else
-		{
-			//Line is not colliding
-			return false;
-		}
-	}
-	else
-	{
-		// Point is not on the line, line is not colliding
-		return false;
-	}
-
 }
 
 //TODO : Two step initialization

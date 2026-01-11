@@ -4,6 +4,7 @@
 #include "Resources.h"
 #include <string>
 #include "Constants.h"
+#include "CollisionSystem.h"
 
 //TODO : No private members in structs
 //TODO : Missing const correctness
@@ -157,8 +158,6 @@ public:
 	void Render();
 
 	void SpawnAliens();
-
-	bool CheckCollision(Vector2 circlePos, float circleRadius, Vector2 lineTop, Vector2 lineBottom);
 
 	bool CheckNewHighScore();
 
