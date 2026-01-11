@@ -5,8 +5,13 @@
 #include <thread>
 #include <fstream>
 
+//TODO : Alot of magic numbers
+//TODO : No const correctness
 
 // MATH FUNCTIONS
+//TODO : Move to a separate math utility file
+//TODO : Add const correctness
+//TODO : Use std prefix for functions like pow and sqrtf
 float lineLength(Vector2 A, Vector2 B) //Uses pythagoras to calculate the length of a line
 {
 	float length = sqrtf(pow(B.x - A.x, 2) + pow(B.y - A.y, 2));
@@ -28,7 +33,7 @@ bool pointInCircle(Vector2 circlePos, float radius, Vector2 point) // Uses pytha
 	}
 }
 
-
+//TODO : Mixing Initialization and game logic
 void Game::Start()
 {
 	// creating walls 
@@ -45,7 +50,7 @@ void Game::Start()
 
 	}
 
-
+	//TODO : Remove two-step initialization
 	//creating player
 	Player newPlayer;
 	player = newPlayer;
@@ -54,7 +59,7 @@ void Game::Start()
 	//creating aliens
 	SpawnAliens();
 	
-
+	//TODO : Remove two-step initialization
 	//creating background
 	Background newBackground;
 	newBackground.Initialize(600);
@@ -67,6 +72,7 @@ void Game::Start()
 
 }
 
+//TODO : Add error handling
 void Game::End()
 {
 	//SAVE SCORE AND UPDATE SCOREBOARD
@@ -85,10 +91,12 @@ void Game::Continue()
 
 void Game::Launch()
 {
+	//TODO : Move resource loading to a separate resource manager
 	//LOAD SOME RESOURCES HERE
 	resources.Load();
 }
 
+//TODO : Too long function, break into smaller functions
 void Game::Update()
 {
 	switch (gameState)
@@ -112,7 +120,7 @@ void Game::Update()
 
 		//Update Player
 		player.Update();
-		
+		//TODO: Extract function
 		//Update Aliens and Check if they are past player
 		for (int i = 0; i < Aliens.size(); i++)
 		{
@@ -123,32 +131,33 @@ void Game::Update()
 				End();
 			}
 		}
-
+		//TODO: Extract function
 		//End game if player dies
 		if (player.lives < 1)
 		{
 			End();
 		}
-
+		//TODO: Extract function
 		//Spawn new aliens if aliens run out
 		if (Aliens.size() < 1)
 		{
 			SpawnAliens();
 		}
 
-
+		//TODO: Extract function
 		// Update background with offset
 		playerPos = { player.x_pos, (float)player.player_base_height };
 		cornerPos = { 0, (float)player.player_base_height };
 		offset = lineLength(playerPos, cornerPos) * -1;
 		background.Update(offset / 15);
 
-
+		//TODO: Extract function
 		//UPDATE PROJECTILE
 		for (int i = 0; i < Projectiles.size(); i++)
 		{
 			Projectiles[i].Update();
 		}
+		//TODO: Extract function
 		//UPDATE PROJECTILE
 		for (int i = 0; i < Walls.size(); i++)
 		{
@@ -156,6 +165,8 @@ void Game::Update()
 		}
 
 		//CHECK ALL COLLISONS HERE
+		//TODO : Breaking law of Demeter
+		//TODO: Extract function
 		for (int i = 0; i < Projectiles.size(); i++)
 		{
 			if (Projectiles[i].type == EntityType::PLAYER_PROJECTILE)
@@ -175,6 +186,7 @@ void Game::Update()
 			}
 
 			//ENEMY PROJECTILES HERE
+			//TODO: Extract function
 			for (int i = 0; i < Projectiles.size(); i++)
 			{
 				if (Projectiles[i].type == EntityType::ENEMY_PROJECTILE)
@@ -203,6 +215,7 @@ void Game::Update()
 		}
 
 		//MAKE PROJECTILE
+		//TODO: Extract function
 		if (IsKeyPressed(KEY_SPACE))
 		{
 			float window_height = (float)GetScreenHeight();
@@ -214,6 +227,7 @@ void Game::Update()
 		}
 
 		//Aliens Shooting
+		//TODO: Extract function
 		shootTimer += 1;
 		if (shootTimer > 59) //once per second
 		{
@@ -234,6 +248,7 @@ void Game::Update()
 		}
 
 		// REMOVE INACTIVE/DEAD ENITITIES
+		//TODO: Extract function
 		for (int i = 0; i < Projectiles.size(); i++)
 		{
 			if (Projectiles[i].active == false)
@@ -265,6 +280,7 @@ void Game::Update()
 		
 
 	break;
+	//TODO : Mixing game logic with UI logic
 	case State::ENDSCREEN:
 		//Code
 	
@@ -295,6 +311,7 @@ void Game::Update()
 					// NOTE: Only allow keys in range [32..125]
 					if ((key >= 32) && (key <= 125) && (letterCount < 9))
 					{
+						//TODO : Remove c-style string manipulation with char array
 						name[letterCount] = (char)key;
 						name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
 						letterCount++;
@@ -345,7 +362,7 @@ void Game::Update()
 	}
 }
 
-
+//TODO : Too long function, break into smaller functions
 void Game::Render()
 {
 	switch (gameState)
@@ -491,6 +508,7 @@ void Game::SpawnAliens()
 			newAlien.position.x = formationX + 450 + (col * alienSpacing);
 			newAlien.position.y = formationY + (row * alienSpacing);
 			Aliens.push_back(newAlien);
+			// TODO: Remove debug print statements
 			std::cout << "Find Alien -X:" << newAlien.position.x << std::endl;
 			std::cout << "Find Alien -Y:" << newAlien.position.y << std::endl;
 		}
@@ -500,11 +518,13 @@ void Game::SpawnAliens()
 
 bool Game::CheckNewHighScore()
 {
+	//TODO : Hardcoded leaderboard size
+	//TODO : Should return false is leaderboard is empty
 	if (score > Leaderboard[4].score)
 	{
 		return true;
 	}
-
+	
 	return false;
 }
 
@@ -514,6 +534,7 @@ void Game::InsertNewHighScore(std::string name)
 	newData.name = name;
 	newData.score = score;
 
+	//TODO : use a algorithm for the manual loop
 	for (int i = 0; i < Leaderboard.size(); i++)
 	{
 		if (newData.score > Leaderboard[i].score)
@@ -528,7 +549,8 @@ void Game::InsertNewHighScore(std::string name)
 		}
 	}
 }
-
+\
+//TODO : Incomplete code
 void Game::LoadLeaderboard()
 {
 	// CLEAR LEADERBOARD
@@ -542,6 +564,8 @@ void Game::LoadLeaderboard()
 	//CLOSE FILE
 }
 
+//TODO : Incomplete code
+//TODO : Add error handling for file operations
 void Game::SaveLeaderboard()
 {
 	// SAVE LEADERBOARD AS ARRAY
@@ -549,6 +573,7 @@ void Game::SaveLeaderboard()
 	// OPEN FILE
 	std::fstream file;
 
+	//TODO : Open but unused
 	file.open("Leaderboard");
 
 	if (!file)
@@ -578,7 +603,7 @@ bool Game::CheckCollision(Vector2 circlePos, float circleRadius, Vector2 lineSta
 	{
 		return true;
 	}
-
+	//TODO : To many parameters 
 	// simplify variables
 	Vector2 A = lineStart;
 	Vector2 B = lineEnd;
@@ -633,11 +658,13 @@ bool Game::CheckCollision(Vector2 circlePos, float circleRadius, Vector2 lineSta
 
 }
 
+//TODO : Two step initialization
 void Player::Initialize() 
 {
-	
+	//TODO : pass in screen width as parameter
 	float window_width = (float)GetScreenWidth();
 	x_pos = window_width / 2;
+	//TODO : Remove debug print statements
 	std::cout<< "Find Player -X:" << GetScreenWidth() / 2 << "Find Player -Y" << GetScreenHeight() - player_base_height << std::endl;
 
 }
@@ -685,6 +712,7 @@ void Player::Update()
 	
 }
 
+//TODO : Player dont need to know about texture details
 void Player::Render(Texture2D texture) 
 {
 	float window_height = GetScreenHeight(); 
@@ -724,6 +752,7 @@ void Projectile::Update()
 	}
 }
 
+// TODO : Projectile dont need to know about texture details
 void Projectile::Render(Texture2D texture)
 {
 	//DrawCircle((int)position.x, (int)position.y, 10, RED);
@@ -744,6 +773,7 @@ void Projectile::Render(Texture2D texture)
 		WHITE);
 }
 
+// TODO : Wall dont need to know about texture details
 void Wall::Render(Texture2D texture)
 {
 	DrawTexturePro(texture,
@@ -781,6 +811,7 @@ void Wall::Update()
 
 void Alien::Update() 
 {
+	//TODO : Unused variable
 	int window_width = GetScreenWidth(); 
 
 	if (moveRight)
@@ -805,6 +836,7 @@ void Alien::Update()
 	}
 }
 
+// TODO : Alien dont need to know about texture details
 void Alien::Render(Texture2D texture) 
 {
 	//DrawRectangle((int)position.x - 25, (int)position.y, 30, 30, RED);
@@ -843,7 +875,7 @@ void Star::Render()
 	DrawCircle((int)position.x, (int)position.y, size, color);
 }
 
-
+//TODO : Two step initialization
 void Background::Initialize(int starAmount)
 {
 	for (int i = 0; i < starAmount; i++)
@@ -895,6 +927,7 @@ void Background::Render()
 
 
 
+//TODO : Legacy code removal
 
 /*LEGACY CODE
 	// our objective is to calculate the distance between the closest point of the line to the centre of the circle,

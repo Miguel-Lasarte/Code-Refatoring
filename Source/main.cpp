@@ -32,6 +32,7 @@ int main(void)
 {    
     // Initialization
     //--------------------------------------------------------------------------------------
+	//TODO : Remove magic numbers
     const int screenWidth = 1920;
     const int screenHeight = 1080;
 
@@ -48,7 +49,8 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     InitAudioDevice();
-
+	//TODO : Unused sound variable
+	//TODO : No RAII for sound resource
     auto sound = LoadSound("./hitHurt.ogg");
     
 
@@ -96,6 +98,7 @@ int main(void)
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
+	//TODO : File never used
     std::string filename = "level.txt";  
 
     return 0;

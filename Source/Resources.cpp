@@ -1,6 +1,9 @@
 #include "Resources.h"
 #include <iostream>;
 
+//TODO : Resources loaded but never unloaded
+//TODO : No texture validadetion
+//TODO : Error handling for missing files
 void Resources::Load()
 {
 	std::cout << "Yay"; // yes

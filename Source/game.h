@@ -4,6 +4,10 @@
 #include "Resources.h"
 #include <string>
 
+//TODO : No private members in structs
+//TODO : Missing const correctness
+//TODO : A lot of magic numbers
+//TODO : Inconsistent naming conventions
 
 enum struct State
 {
@@ -70,6 +74,7 @@ struct Wall
 {
 public: 
 	Vector2 position; 
+	//TODO Unused Rectangle variable
 	Rectangle rec; 
 	bool active; 
 	Color color; 
@@ -87,6 +92,7 @@ public:
 	
 	Color color = WHITE; 
 	Vector2 position = {0, 0};
+	//TODO : Unused x and y variables
 	int x = 0; 
 	int y = 0; 
 	float radius = 30;

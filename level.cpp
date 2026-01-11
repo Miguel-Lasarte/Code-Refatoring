@@ -4,6 +4,8 @@
 #include <string>
 #include "level.h"
 
+
+//TODO : File never used
 void LoadLevelFromFile(const std::string& filename) 
 {
 	std::ifstream file(filename); 
