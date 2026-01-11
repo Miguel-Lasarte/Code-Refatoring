@@ -225,6 +225,7 @@ void Game::Update()
 			Projectile newProjectile;
 			newProjectile.position.x = player.x_pos;
 			newProjectile.position.y = window_height - GameConstants::Player::Shooting::SPAWN_Y_OFFSET;
+
 			newProjectile.type = EntityType::PLAYER_PROJECTILE;
 			Projectiles.push_back(newProjectile);
 		}
@@ -244,6 +245,7 @@ void Game::Update()
 			Projectile newProjectile;
 			newProjectile.position = Aliens[randomAlienIndex].position;
 			newProjectile.position.y += GameConstants::Alien::Shooting::Y_OFFSET;
+			newProjectile.speed = GameConstants::Alien::Shooting::PROJECTILE_SPEED;
 			newProjectile.type = EntityType::ENEMY_PROJECTILE;
 			Projectiles.push_back(newProjectile);
 			shootTimer = 0;
@@ -312,7 +314,7 @@ void Game::Update()
 				while (key > 0)
 				{
 					// NOTE: Only allow keys in range [32..125]
-					if ((key >= 32) && (key <= 125) && (letterCount < GameConstants::UI::MAX_NAME_LENGTH))
+					if ((key >= 32) && (key <= 125) && (letterCount < GameConstants::UI::MAX_NAME_CHARS))
 					{
 						//TODO : Remove c-style string manipulation with char array
 						name[letterCount] = (char)key;
@@ -344,7 +346,7 @@ void Game::Update()
 
 			// If the name is right legth and enter is pressed, exit screen by setting highscore to false and add 
 			// name + score to scoreboard
-			if (letterCount > 0 && letterCount < GameConstants::UI::MAX_NAME_LENGTH && IsKeyReleased(KEY_ENTER))
+			if (letterCount > 0 && letterCount < GameConstants::UI::MAX_NAME_CHARS && IsKeyReleased(KEY_ENTER))
 			{
 				std::string nameEntry(name);
 
@@ -448,7 +450,7 @@ void Game::Render()
 
 			if (mouseOnText)
 			{
-				if (letterCount < MAX_NAME_LENGTH)
+				if (letterCount < MAX_NAME_CHARS)
 				{
 					// Draw blinking underscore char
 					if (((framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2) == 0)
@@ -466,7 +468,7 @@ void Game::Render()
 			}
 
 			// Explain how to continue when name is input
-			if (letterCount > 0 && letterCount < MAX_NAME_LENGTH)
+			if (letterCount > 0 && letterCount < MAX_NAME_CHARS)
 			{
 				DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y, EndScreen::CONTINUE_SIZE, YELLOW);
 			}
@@ -736,7 +738,7 @@ void Player::Render(Texture2D texture)
 void Projectile::Update()
 {
 	using namespace GameConstants::Projectile;
-	position.y -= SPEED;
+	position.y -= speed;
 
 	// UPDATE LINE POSITION
 	lineStart.y = position.y - LENGTH;

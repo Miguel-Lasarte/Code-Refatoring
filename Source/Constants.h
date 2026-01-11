@@ -109,7 +109,8 @@ namespace GameConstants
 
 	namespace UI {
 		constexpr int MAX_NAME_LENGTH = 8;
-		constexpr int LEADERBOARD_SIZE = 5;
+		constexpr int MAX_NAME_CHARS = MAX_NAME_LENGTH + 1;
+		constexpr int LEADERBOARD_SIZE = 4;
 		constexpr int TEXT_BLINK_INTERVAL = 20;
 
 		namespace StartScreen {
@@ -157,8 +158,8 @@ namespace GameConstants
 			constexpr int TITLE_Y = 100;
 			constexpr int ROW_HEIGHT = 40;
 			constexpr int START_Y = 140;
-			constexpr int NAME_X = 40;
-			constexpr int SCORE_X = 40;
+			constexpr int NAME_X = 50;
+			constexpr int SCORE_X = 350;
 		}
 	}
 
