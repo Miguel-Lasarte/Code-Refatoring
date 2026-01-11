@@ -1,5 +1,5 @@
 #include "Resources.h"
-#include <iostream>;
+#include <iostream>
 
 //TODO : Resources loaded but never unloaded
 //TODO : No texture validadetion
