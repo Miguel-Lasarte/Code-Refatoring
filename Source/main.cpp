@@ -23,6 +23,7 @@
 
 #include "raylib.h"
 #include "game.h"
+#include "Constants.h"
 
 
 //------------------------------------------------------------------------------------
@@ -33,12 +34,11 @@ int main(void)
     // Initialization
     //--------------------------------------------------------------------------------------
 	//TODO : Remove magic numbers
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
+  
 
-    InitWindow(screenWidth, screenHeight, "SPACE INVADERS");
+    InitWindow(GameConstants::Screen::WIDTH, GameConstants::Screen::HEIGHT, "SPACE INVADERS");
 
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    SetTargetFPS(GameConstants::Screen::TARGET_FPS);               // Set our game to run at 60 frames-per-second
 
     Game game = { State::STARTSCREEN };
     Resources resources;

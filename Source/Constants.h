@@ -6,7 +6,7 @@ namespace GameConstants
 	{
 		constexpr int WIDTH = 1920;
 		constexpr int HEIGHT = 1080;
-		constexpr int TARGEY_FPS = 60;
+		constexpr int TARGET_FPS = 60;
 	}
 	namespace Player
 	{
@@ -19,6 +19,7 @@ namespace GameConstants
 			constexpr float TEXTURE_SIZE = 100.0f;
 			constexpr float TEXTURE_OFFSET = 50.0f;
 			constexpr int TEXTURE_COUNT = 3;
+			constexpr float SOURCE_SIZE = 352.0f;
 		}
 
 		namespace Animation
@@ -33,13 +34,14 @@ namespace GameConstants
 	namespace Projectile {
 
 		constexpr int SPEED = 15;
-		constexpr float LENGHT = 15.0f;
+		constexpr float LENGTH = 15.0f;
 		constexpr int OUT_OF_BOUNDS = 1500;
 
 		namespace Rendering {
 
-			constexpr float TEXTURE_SIZE = 200.f;
-			constexpr float TEXTURE_OFFSET = 100.f;
+			constexpr float TEXTURE_SIZE = 50.f;
+			constexpr float TEXTURE_OFFSET = 25.f;
+			constexpr float SOURCE_SIZE = 176.0f;
 		}
 	}
 	namespace Wall {
@@ -52,6 +54,7 @@ namespace GameConstants
 		{
 			constexpr float TEXTURE_SIZE = 200.f;
 			constexpr float TEXTURE_OFFSET = 100.f;
+			constexpr float SOURCE_SIZE = 704.0f;
 
 			namespace HealthDisplay
 			{
@@ -70,6 +73,7 @@ namespace GameConstants
 		namespace Rendering {
 			constexpr float TEXTURE_SIZE = 100.f;
 			constexpr float TEXTURE_OFFSET = 50.f;
+			constexpr float SOURCE_SIZE = 352.0f;
 		}
 
 		namespace Shooting {

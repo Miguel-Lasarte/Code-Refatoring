@@ -3,6 +3,7 @@
 #include <vector>
 #include "Resources.h"
 #include <string>
+#include "Constants.h"
 
 //TODO : No private members in structs
 //TODO : Missing const correctness
@@ -35,10 +36,7 @@ struct Player
 public:
 
 	float x_pos = 0;
-	float speed = 7;
-	float player_base_height = 70.0f;  
-	float radius = 50;
-	int lives = 3;
+	int lives = GameConstants::Player::INITIAL_LIVES;
 	int direction = 0;
 	int activeTexture = 0;
 	float timer = 0;
@@ -57,7 +55,6 @@ struct Projectile
 public: 
 	// INITIALIZE PROJECTILE WHILE DEFINING IF ITS PLAYER OR ENEMY 
 	Vector2 position = {0,0};
-	int speed = 15; 
 	bool active = true;  
 	EntityType type = {};
 
@@ -78,8 +75,7 @@ public:
 	Rectangle rec; 
 	bool active; 
 	Color color; 
-	int health = 50;
-	int radius = 60;
+	int health = GameConstants::Wall::INITIAL_HEALTH;
 
 
 	void Render(Texture2D texture); 
@@ -95,13 +91,11 @@ public:
 	//TODO : Unused x and y variables
 	int x = 0; 
 	int y = 0; 
-	float radius = 30;
 	bool active = true;  
 	bool moveRight = true; 
 	
 	EntityType type = EntityType::ENEMY; 
 
-	int speed = 2; 
 		 
 	void Update(); 
 	void Render(Texture2D texture); 
@@ -146,12 +140,6 @@ struct Game
 
 	//Aliens stuff? (idk cause liv wrote this)
 	Rectangle rec = { 0, 0 ,0 ,0 }; 
-
-	int formationWidth = 8;
-	int formationHeight = 5;
-	int alienSpacing = 80;
-	int formationX = 100;
-	int formationY = 50;
 
 	bool newHighScore = false;
 	
@@ -204,8 +192,6 @@ struct Game
 	//TEXTBOX ENTER
 	char name[9 + 1] = "\0";      //One extra space required for null terminator char '\0'
 	int letterCount = 0;
-
-	Rectangle textBox = { 600, 500, 225, 50 };
 	bool mouseOnText = false;
 
 	int framesCounter = 0;
