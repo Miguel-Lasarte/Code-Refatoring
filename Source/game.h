@@ -126,7 +126,9 @@ struct Background
 };
 
 struct Game
-{
+{private:
+	Resources resources;
+public:
 	// Gamestate
 	State gameState = {};
 
@@ -144,12 +146,12 @@ struct Game
 
 	bool newHighScore = false;
 	
-
+	Game();
 	void Start();
 	void End();
 
 	void Continue();
-	void Launch();
+	
 
 	void Update();
 	void Render();
@@ -164,10 +166,6 @@ struct Game
 
 	void LoadLeaderboard();
 	void SaveLeaderboard();
-
-
-	// Entity Storage and Resources
-	Resources resources;
 
 	Player player;
 

@@ -24,82 +24,52 @@
 #include "raylib.h"
 #include "game.h"
 #include "Constants.h"
+#include "ResourceHandle.h"
+#include <exception>
+
+
 
 
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
-int main(void)
-{    
-    // Initialization
-    //--------------------------------------------------------------------------------------
-	//TODO : Remove magic numbers
-  
+int main()
+{
 
     InitWindow(GameConstants::Screen::WIDTH, GameConstants::Screen::HEIGHT, "SPACE INVADERS");
 
     SetTargetFPS(GameConstants::Screen::TARGET_FPS);               // Set our game to run at 60 frames-per-second
 
-    Game game = { State::STARTSCREEN };
-    Resources resources;
-    game.resources = resources;
-    game.Launch();
-
-    
-    //--------------------------------------------------------------------------------------
-
     InitAudioDevice();
-	//TODO : Unused sound variable
-	//TODO : No RAII for sound resource
-    auto sound = LoadSound("./hitHurt.ogg");
     
+    try {
+		Game game;
+        while (!WindowShouldClose())    // Detect window close button or ESC key
+        {
+            
+
+            game.Update();
+
+
+            BeginDrawing();
+
+            ClearBackground(BLACK);
 
 
 
-    // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
+            game.Render();
 
-        //if (IsKeyPressed(KEY_SPACE))
-        //{
-        //    PlaySound(sound);
-        //}
-
-        //if (IsKeyPressed(KEY_BACKSPACE))
-        //{
-        //    StopSound(sound);
-        //}
-
-        game.Update();
-      
-
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-        ClearBackground(BLACK);
-
-       
-
-        game.Render();
-
-        EndDrawing();
-        //----------------------------------------------------------------------------------
+            EndDrawing();
+           
+        }
     }
+    catch (const std::exception& e) {
+		TraceLog(LOG_ERROR,"Game error: %s", e.what());
+	}
 
     CloseAudioDevice();
-    
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
-	//TODO : File never used
-    std::string filename = "level.txt";  
+  
+    CloseWindow();       
 
     return 0;
 }

@@ -35,7 +35,11 @@ bool pointInCircle(Vector2 circlePos, float radius, Vector2 point) // Uses pytha
 		return false;
 	}
 }
-
+Game::Game() : resources()
+{
+	gameState = State::STARTSCREEN;
+	score = 0;
+}
 //TODO : Mixing Initialization and game logic
 void Game::Start()
 {
@@ -92,12 +96,7 @@ void Game::Continue()
 	gameState = State::STARTSCREEN;
 }
 
-void Game::Launch()
-{
-	//TODO : Move resource loading to a separate resource manager
-	//LOAD SOME RESOURCES HERE
-	resources.Load();
-}
+
 
 //TODO : Too long function, break into smaller functions
 void Game::Update()
@@ -393,24 +392,24 @@ void Game::Render()
 		DrawText(TextFormat("Lives: %i", player.lives), HUD::LIVES_X, HUD::LIVES_Y, HUD::TEXT_SIZE, YELLOW);
 
 		//player rendering 
-		player.Render(resources.shipTextures[player.activeTexture]);
+		player.Render(resources.GetShipTexture(player.activeTexture));
 
 		//projectile rendering
 		for (int i = 0; i < Projectiles.size(); i++)
 		{
-			Projectiles[i].Render(resources.laserTexture);
+			Projectiles[i].Render(resources.GetProjectileTexture());
 		}
 
 		// wall rendering 
 		for (int i = 0; i < Walls.size(); i++)
 		{
-			Walls[i].Render(resources.barrierTexture);
+			Walls[i].Render(resources.GetWallTexture());
 		}
 
 		//alien rendering  
 		for (int i = 0; i < Aliens.size(); i++)
 		{
-			Aliens[i].Render(resources.alienTexture);
+			Aliens[i].Render(resources.GetAlienTexture());
 		}
 
 
