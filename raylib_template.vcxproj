@@ -165,11 +165,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\CollisionSystem.cpp" />
     <ClCompile Include="Source\game.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Resources.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\CollisionSystem.h" />
     <ClInclude Include="Source\Constants.h" />
     <ClInclude Include="Source\game.h" />
     <ClInclude Include="Source\ResourceHandle.h" />
