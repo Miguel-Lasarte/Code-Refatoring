@@ -618,16 +618,12 @@ void Player::Render(const Resources& resources) const
 void Projectile::Update()
 {
 	using namespace GameConstants::Projectile;
-	position.y -= speed;
+	position.y -= static_cast<float>(speed);
 
-	// UPDATE LINE POSITION
-	lineStart.y = position.y - LENGTH;
-	lineEnd.y = position.y + LENGTH;
+	lineStart = { position.x, position.y - LENGTH };
+	lineEnd = { position.x, position.y + LENGTH };
 
-	lineStart.x = position.x;
-	lineEnd.x = position.x;
-
-	if (position.y < 0 || position.y > OUT_OF_BOUNDS)
+	if (position.y < 0.f || position.y > OUT_OF_BOUNDS)
 	{
 		active = false;
 	}
@@ -636,7 +632,6 @@ void Projectile::Update()
 void Projectile::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Projectile::Rendering;
-	//DrawCircle((int)position.x, (int)position.y, 10, RED);
 	DrawTexturePro(resources.GetProjectileTexture(),
 		{
 			0,
@@ -674,7 +669,6 @@ void Wall::Render(const Resources& resources) const
 		WHITE);
 
 
-	// Cast float to int to resolve C4244 warning
 	DrawText(
 		TextFormat("%i", health),
 		static_cast<int>(position.x - HealthDisplay::TEXT_OFFSET_X),
@@ -687,7 +681,6 @@ void Wall::Render(const Resources& resources) const
 void Wall::Update()
 {
 
-	// set walls as inactive when out of health
 	if (health < 1)
 	{
 		active = false;
@@ -703,12 +696,12 @@ void Wall::takeDamage() noexcept
 void Alien::Update()
 {
 	using namespace GameConstants::Alien;
-
+	const float screenWidth = static_cast<float>(GetScreenWidth());
 	if (moveRight)
 	{
 		position.x += SPEED;
 
-		if (position.x >= GetScreenWidth())
+		if (position.x >= screenWidth)
 		{
 			moveRight = false;
 			position.y += DROP_DISTANCE;
@@ -729,11 +722,7 @@ void Alien::Update()
 void Alien::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Alien::Rendering;
-	//DrawRectangle((int)position.x - 25, (int)position.y, 30, 30, RED);
-	//DrawCircle((int)position.x, (int)position.y, radius, GREEN);
-
-
-
+	
 	DrawTexturePro(resources.GetAlienTexture(),
 		{
 			0,
