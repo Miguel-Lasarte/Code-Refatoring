@@ -159,6 +159,8 @@ private:
 	void RenderStart() const;
 	void RenderGameplay() const;
 	void RenderEnd() const;
+	void RenderEntryName() const;
+	void RenderLeaderboard() const;
 public:
 	// Gamestate
 	State gameState = {};

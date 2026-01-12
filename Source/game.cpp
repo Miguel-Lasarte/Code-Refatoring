@@ -443,63 +443,74 @@ void Game::RenderGameplay() const {
 }
 
 void Game::RenderEnd() const {
-	using namespace GameConstants::UI;
+	using namespace GameConstants::UI::EndScreen;
 	if (newHighScore)
 	{
-		DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y, EndScreen::HIGHSCORE_SIZE, YELLOW);
+		RenderEntryName();
+	}
+	else {
+		DrawText("PRESS ENTER TO CONTINUE", HIGHSCORE_X, CONTINUE_Y, CONTINUE_SIZE, YELLOW);
+		RenderLeaderboard();
+	}
+}
+
+void Game::RenderEntryName() const {
+	using namespace GameConstants::UI;
+	DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y, EndScreen::HIGHSCORE_SIZE, YELLOW);
 
 
-		using namespace GameConstants::UI::EndScreen::NameEntry;
-		DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
+	using namespace GameConstants::UI::EndScreen::NameEntry;
+	DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
 
-		DrawRectangle(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, LIGHTGRAY);
-		if (mouseOnText)
+	DrawRectangle(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, LIGHTGRAY);
+	if (mouseOnText)
+	{
+		DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, RED);
+	}
+	else
+	{
+		DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, DARKGRAY);
+	}
+
+	DrawText(name, TEXTBOX_X + TEXT_X_OFFSET, TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
+
+	DrawText(TextFormat("INPUT CHARS: %i/%i", letterCount, MAX_NAME_LENGTH), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
+
+	if (mouseOnText)
+	{
+		if (letterCount < MAX_NAME_CHARS)
 		{
-			DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, RED);
+			if (((framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2) == 0)
+			{
+				DrawText("_", TEXTBOX_X + TEXT_X_OFFSET + MeasureText(name, TEXT_SIZE), TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
+			}
+
 		}
 		else
 		{
-			DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, DARKGRAY);
-		}
-
-		DrawText(name, TEXTBOX_X + TEXT_X_OFFSET, TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
-
-		DrawText(TextFormat("INPUT CHARS: %i/%i", letterCount, MAX_NAME_LENGTH), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
-
-		if (mouseOnText)
-		{
-			if (letterCount < MAX_NAME_CHARS)
-			{
-				if (((framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2) == 0)
-				{
-					DrawText("_", TEXTBOX_X + TEXT_X_OFFSET + MeasureText(name, TEXT_SIZE), TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
-				}
-
-			}
-			else
-			{
-				DrawText("Press BACKSPACE to delete chars...", TEXTBOX_X, BACKSPACE_PROMPT_Y, PROMPT_SIZE, YELLOW);
-			}
-
-		}
-
-		if (letterCount > 0 && letterCount < MAX_NAME_CHARS)
-		{
-			DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y, EndScreen::CONTINUE_SIZE, YELLOW);
+			DrawText("Press BACKSPACE to delete chars...", TEXTBOX_X, BACKSPACE_PROMPT_Y, PROMPT_SIZE, YELLOW);
 		}
 
 	}
-	else {
-		DrawText("PRESS ENTER TO CONTINUE", EndScreen::HIGHSCORE_X, EndScreen::CONTINUE_Y, EndScreen::CONTINUE_SIZE, YELLOW);
 
-		DrawText("LEADERBOARD", Leaderboard::TITLE_X, Leaderboard::TITLE_Y, HUD::TEXT_SIZE, YELLOW);
+	if (letterCount > 0 && letterCount < MAX_NAME_CHARS)
+	{
+		DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y, EndScreen::CONTINUE_SIZE, YELLOW);
+	}
 
-		for (int i = 0; i < Leaderboard.size(); i++)
-		{
-			const char* tempNameDisplay = Leaderboard[i].name.data();
-			DrawText(tempNameDisplay, Leaderboard::NAME_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-			DrawText(TextFormat("%i", Leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-		}
+}
+
+void Game::RenderLeaderboard() const {
+	using namespace GameConstants::UI;
+	DrawText("PRESS ENTER TO CONTINUE", EndScreen::HIGHSCORE_X, EndScreen::CONTINUE_Y, EndScreen::CONTINUE_SIZE, YELLOW);
+
+	DrawText("LEADERBOARD", Leaderboard::TITLE_X, Leaderboard::TITLE_Y, HUD::TEXT_SIZE, YELLOW);
+
+	for (int i = 0; i < Leaderboard.size(); i++)
+	{
+		const char* tempNameDisplay = Leaderboard[i].name.data();
+		DrawText(tempNameDisplay, Leaderboard::NAME_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
+		DrawText(TextFormat("%i", Leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
 	}
 }
 
