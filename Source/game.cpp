@@ -34,6 +34,16 @@ Background::Background() {
 	}
 }
 
+Projectile::Projectile(Vector2 startPos, EntityType projType, int speed) : position(startPos), type(projType), speed(speed) {
+	lineStart = { position.x, position.y - GameConstants::Projectile::LENGTH };
+	lineEnd = { position.x, position.y + GameConstants::Projectile::LENGTH };
+}
+Wall::Wall(Vector2 pos) : position(pos) {
+}
+
+Alien::Alien(float x, float y) : position({ x, y }) {
+}
+
 //TODO : Mixing Initialization and game logic
 void Game::Start()
 {
@@ -41,14 +51,10 @@ void Game::Start()
 	float window_width = (float)GetScreenWidth();
 	float window_height = (float)GetScreenHeight();
 	float wall_distance = window_width / (wallCount + 1);
-	for (int i = 0; i < wallCount; i++)
+	for (size_t i = 0; i < wallCount; i++)
 	{
-		Wall newWalls;
-		newWalls.position.y = window_height - GameConstants::Wall::Y_OFFSET;
-		newWalls.position.x = wall_distance * (i + 1);
-
-		Walls.push_back(newWalls);
-
+		const Vector2 pos = { wall_distance * (i + 1), window_height - GameConstants::Wall::Y_OFFSET };
+		Walls.emplace_back(pos);
 	}
 
 	//TODO : Remove two-step initialization
@@ -116,7 +122,7 @@ void Game::Update()
 		{
 			Aliens[i].Update();
 
-			if (Aliens[i].position.y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
+			if (Aliens[i].GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
 			{
 				End();
 			}
@@ -159,17 +165,17 @@ void Game::Update()
 		//TODO: Extract function
 		for (int i = 0; i < Projectiles.size(); i++)
 		{
-			if (Projectiles[i].type == EntityType::PLAYER_PROJECTILE)
+			if (Projectiles[i].GetType() == EntityType::PLAYER_PROJECTILE)
 			{
 				for (int a = 0; a < Aliens.size(); a++)
 				{
-					if (CollisionSystem::CheckCollision(Aliens[a].position, GameConstants::Alien::RADIUS, Projectiles[i].lineStart, Projectiles[i].lineEnd))
+					if (CollisionSystem::CheckCollision(Aliens[a].GetPosition(), GameConstants::Alien::RADIUS, Projectiles[i].GetLineStart(), Projectiles[i].GetLineEnd()))
 					{
 						// Kill!
 						std::cout << "Hit! \n";
 						// Set them as inactive, will be killed later
-						Projectiles[i].active = false;
-						Aliens[a].active = false;
+						Projectiles[i].SetInactive();
+						Aliens[a].SetInactive();
 						score += GameConstants::Scoring::POINTS_PER_ALIEN;
 					}
 				}
@@ -179,12 +185,12 @@ void Game::Update()
 			//TODO: Extract function
 			for (int j = 0; j < Projectiles.size(); j++)
 			{
-				if (Projectiles[j].type == EntityType::ENEMY_PROJECTILE)
+				if (Projectiles[j].GetType() == EntityType::ENEMY_PROJECTILE)
 				{
-					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT }, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
+					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT }, GameConstants::Player::BASE_HEIGHT, Projectiles[j].GetLineStart(), Projectiles[j].GetLineEnd()))
 					{
 						std::cout << "dead!\n";
-						Projectiles[j].active = false;
+						Projectiles[j].SetInactive();
 						player.lives -= 1;
 					}
 				}
@@ -193,13 +199,13 @@ void Game::Update()
 
 			for (int b = 0; b < Walls.size(); b++)
 			{
-				if (CollisionSystem::CheckCollision(Walls[b].position, GameConstants::Wall::RADIUS, Projectiles[i].lineStart, Projectiles[i].lineEnd))
+				if (CollisionSystem::CheckCollision(Walls[b].GetPosition(), GameConstants::Wall::RADIUS, Projectiles[i].GetLineStart(), Projectiles[i].GetLineEnd()))
 				{
 					// Kill!
 					std::cout << "Hit! \n";
 					// Set them as inactive, will be killed later
-					Projectiles[i].active = false;
-					Walls[b].health -= 1;
+					Projectiles[i].SetInactive();
+					Walls[b].takeDamage();
 				}
 			}
 		}
@@ -208,13 +214,12 @@ void Game::Update()
 		//TODO: Extract function
 		if (IsKeyPressed(KEY_SPACE))
 		{
-			float window_height = static_cast<float>(GetScreenHeight());
-			Projectile newProjectile;
-			newProjectile.position.x = player.GetXPos();
-			newProjectile.position.y = window_height - GameConstants::Player::Shooting::SPAWN_Y_OFFSET;
+			const Vector2 startPos = {
+				player.GetXPos(),
+				static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
+			};
+			Projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
 
-			newProjectile.type = EntityType::PLAYER_PROJECTILE;
-			Projectiles.push_back(newProjectile);
 		}
 
 		//Aliens Shooting
@@ -228,13 +233,9 @@ void Game::Update()
 			{
 				randomAlienIndex = rand() % Aliens.size();
 			}
-
-			Projectile newProjectile;
-			newProjectile.position = Aliens[randomAlienIndex].position;
-			newProjectile.position.y += GameConstants::Alien::Shooting::Y_OFFSET;
-			newProjectile.speed = GameConstants::Alien::Shooting::PROJECTILE_SPEED;
-			newProjectile.type = EntityType::ENEMY_PROJECTILE;
-			Projectiles.push_back(newProjectile);
+			Vector2 shootPos = Aliens[randomAlienIndex].GetPosition();
+			shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
+			Projectiles.emplace_back(shootPos, EntityType::ENEMY_PROJECTILE, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
 			shootTimer = 0;
 		}
 
@@ -242,17 +243,15 @@ void Game::Update()
 		//TODO: Extract function
 		for (int i = 0; i < Projectiles.size(); i++)
 		{
-			if (Projectiles[i].active == false)
+			if (!Projectiles[i].IsActive())
 			{
 				Projectiles.erase(Projectiles.begin() + i);
-				// Prevent the loop from skipping an instance because of index changes, since all insances after
-				// the killed objects are moved down in index. This is the same for all loops with similar function
 				i--;
 			}
 		}
 		for (int i = 0; i < Aliens.size(); i++)
 		{
-			if (Aliens[i].active == false)
+			if (!Aliens[i].IsActive())
 			{
 				Aliens.erase(Aliens.begin() + i);
 				i--;
@@ -260,7 +259,7 @@ void Game::Update()
 		}
 		for (int i = 0; i < Walls.size(); i++)
 		{
-			if (Walls[i].active == false)
+			if (!Walls[i].IsActive())
 			{
 				Walls.erase(Walls.begin() + i);
 				i--;
@@ -379,25 +378,23 @@ void Game::Render()
 		DrawText(TextFormat("Score: %i", score), HUD::SCORE_X, HUD::SCORE_Y, HUD::TEXT_SIZE, YELLOW);
 		DrawText(TextFormat("Lives: %i", player.lives), HUD::LIVES_X, HUD::LIVES_Y, HUD::TEXT_SIZE, YELLOW);
 
-		//player rendering 
-		player.Render(resources.GetShipTexture(player.GetActiveTextureIndex()));
+		
+		player.Render(resources);
 
-		//projectile rendering
-		for (int i = 0; i < Projectiles.size(); i++)
+	
+		for(const auto& projectile : Projectiles)
 		{
-			Projectiles[i].Render(resources.GetProjectileTexture());
+			projectile.Render(resources);
 		}
 
-		// wall rendering 
-		for (int i = 0; i < Walls.size(); i++)
+		for(const auto& wall : Walls)
 		{
-			Walls[i].Render(resources.GetWallTexture());
+			wall.Render(resources);
 		}
 
-		//alien rendering  
-		for (int i = 0; i < Aliens.size(); i++)
+		for (const auto& alien : Aliens)
 		{
-			Aliens[i].Render(resources.GetAlienTexture());
+			alien.Render(resources);
 		}
 
 
@@ -489,14 +486,9 @@ void Game::SpawnAliens()
 	using namespace GameConstants::Formation;
 	for (int row = 0; row < HEIGHT; row++) {
 		for (int col = 0; col < WIDTH; col++) {
-			Alien newAlien = Alien();
-			newAlien.active = true;
-			newAlien.position.x = static_cast<float>(START_X + OFFSET_X + (col * SPACING));
-			newAlien.position.y = static_cast<float>(START_Y + (row * SPACING));
-			Aliens.push_back(newAlien);
-			// TODO: Remove debug print statements
-			std::cout << "Find Alien -X:" << newAlien.position.x << std::endl;
-			std::cout << "Find Alien -Y:" << newAlien.position.y << std::endl;
+			const float x = static_cast<float>(START_X + OFFSET_X + (col * SPACING));
+			const float y = static_cast<float>(START_Y + (row * SPACING));
+			Aliens.emplace_back(x, y);
 		}
 	}
 
@@ -602,12 +594,12 @@ void Player::Update()
 	}
 }
 
-void Player::Render(Texture2D resources)
+void Player::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Player;
 	float window_height = static_cast<float>(GetScreenHeight());
 
-	DrawTexturePro(resources,
+	DrawTexturePro(resources.GetShipTexture(activeTexture),
 		{
 			0,
 			0,
@@ -641,12 +633,11 @@ void Projectile::Update()
 	}
 }
 
-// TODO : Projectile dont need to know about texture details
-void Projectile::Render(Texture2D texture)
+void Projectile::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Projectile::Rendering;
 	//DrawCircle((int)position.x, (int)position.y, 10, RED);
-	DrawTexturePro(texture,
+	DrawTexturePro(resources.GetProjectileTexture(),
 		{
 			0,
 			0,
@@ -663,11 +654,10 @@ void Projectile::Render(Texture2D texture)
 		WHITE);
 }
 
-// TODO : Wall dont need to know about texture details
-void Wall::Render(Texture2D texture)
+void Wall::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Wall::Rendering;
-	DrawTexturePro(texture,
+	DrawTexturePro(resources.GetWallTexture(),
 		{
 			0,
 			0,
@@ -705,6 +695,10 @@ void Wall::Update()
 
 
 }
+void Wall::takeDamage() noexcept
+{
+	health--;
+}
 
 void Alien::Update()
 {
@@ -732,8 +726,7 @@ void Alien::Update()
 	}
 }
 
-// TODO : Alien dont need to know about texture details
-void Alien::Render(Texture2D texture)
+void Alien::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Alien::Rendering;
 	//DrawRectangle((int)position.x - 25, (int)position.y, 30, 30, RED);
@@ -741,7 +734,7 @@ void Alien::Render(Texture2D texture)
 
 
 
-	DrawTexturePro(texture,
+	DrawTexturePro(resources.GetAlienTexture(),
 		{
 			0,
 			0,
@@ -778,7 +771,7 @@ void Star::Render() const
 
 void Background::Update(float offset)
 {
-	for(auto& star : stars)
+	for (auto& star : stars)
 	{
 		star.Update(offset);
 	}

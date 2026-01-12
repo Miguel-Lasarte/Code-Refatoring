@@ -6,9 +6,6 @@
 #include "Constants.h"
 #include "CollisionSystem.h"
 
-//TODO : No private members in structs
-//TODO : Missing const correctness
-//TODO : A lot of magic numbers
 //TODO : Inconsistent naming conventions
 
 enum struct State
@@ -43,7 +40,7 @@ public:
 	Player() = default;
 	explicit Player(float screenWidth);
 	void Update();
-	void Render(Texture2D resources);
+	void Render (const Resources& resources)const;
 	[[nodiscard]] float GetXPos() const noexcept { return xPos; }
 	[[nodiscard]] Vector2 GetPosition() const noexcept {
 		return { xPos,static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
@@ -51,56 +48,66 @@ public:
 	[[nodiscard]] size_t GetActiveTextureIndex() const noexcept { return activeTexture; }
 };
 
-struct Projectile
+class Projectile
 {
-public:
-	// INITIALIZE PROJECTILE WHILE DEFINING IF ITS PLAYER OR ENEMY 
-	Vector2 position = { 0,0 };
+private:
+	Vector2 position = { 0.f,0.f};
 	bool active = true;
-	float speed = GameConstants::Projectile::SPEED;
+	int speed;
 	EntityType type = {};
-
-	// LINE WILL UPDATE WITH POSITION FOR CALCULATIONS
 	Vector2 lineStart = { 0, 0 };
 	Vector2 lineEnd = { 0, 0 };
 
-	void Update();
+public:
 
-	void Render(Texture2D texture);
+	Projectile(Vector2 startPos, EntityType projType, int speed = GameConstants::Projectile::SPEED);
+	void Update();
+	void Render(const Resources& resources) const;
+
+	[[nodiscard]] bool IsActive() const noexcept { return active; }
+	[[nodiscard]] EntityType GetType() const noexcept { return type; }
+	[[nodiscard]] Vector2 GetLineStart() const noexcept { return lineStart; }
+	[[nodiscard]] Vector2 GetLineEnd() const noexcept { return lineEnd; }
+
+	void SetInactive() noexcept { active = false; }
 };
 
-struct Wall
+class Wall
 {
-public:
-	Vector2 position;
-	//TODO Unused Rectangle variable
-	Rectangle rec;
-	bool active;
-	Color color;
+private:
+	Vector2 position = { 0.f,0.f };
 	int health = GameConstants::Wall::INITIAL_HEALTH;
+	bool active = true;
 
-
-	void Render(Texture2D texture);
-	void Update();
-};
-
-struct Alien
-{
 public:
 
-	Color color = WHITE;
-	Vector2 position = { 0, 0 };
-	//TODO : Unused x and y variables
-	int x = 0;
-	int y = 0;
+	explicit Wall(Vector2 pos);
+
+	void Update();
+	void Render(const Resources& resources) const;
+
+	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
+	[[nodiscard]] bool IsActive() const noexcept { return active; }
+
+	void takeDamage() noexcept;
+};
+
+class Alien
+{
+private:
+	Vector2 position = { 0.f, 0.f };
 	bool active = true;
 	bool moveRight = true;
+public:
 
-	EntityType type = EntityType::ENEMY;
-
+	Alien(float x, float y);
 
 	void Update();
-	void Render(Texture2D texture);
+	void Render (const Resources& resources) const;
+
+	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
+	[[nodiscard]] bool IsActive() const noexcept { return active; }
+	void SetInactive() noexcept { active = false; }
 };
 
 class Star

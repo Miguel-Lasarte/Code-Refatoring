@@ -31,6 +31,6 @@ public:
 	[[nodiscard]] Texture2D GetProjectileTexture() const noexcept {
 		return projectileTexture.Get();
 	}
-	[[nodiscard]] Texture2D GetShipTexture(size_t index);
+    [[nodiscard]] Texture2D GetShipTexture(size_t index) const;
 
 };

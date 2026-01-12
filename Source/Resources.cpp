@@ -23,7 +23,7 @@ Resources::Resources() {
 	}
 }
 
-Texture2D Resources::GetShipTexture(size_t index) {
+Texture2D Resources::GetShipTexture(size_t index) const {
 	if (index >= shipTextures.size()) {
 		throw std::out_of_range("Ship texture index out of range.");
 	}
