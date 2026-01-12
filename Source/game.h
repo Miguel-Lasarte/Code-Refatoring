@@ -148,6 +148,8 @@ private:
 	void LoseConditions();
 	void RemoveInactiveEntities();
 	void AlienShooting();
+	void SpawnWalls();
+	void SpawnNewWave();
 
 public:
 	// Gamestate
@@ -188,11 +190,11 @@ public:
 
 	Player player;
 
-	std::vector<Projectile> Projectiles;
+	std::vector<Projectile> projectiles;
 
-	std::vector<Wall> Walls;
+	std::vector<Wall> walls;
 
-	std::vector<Alien> Aliens;
+	std::vector<Alien> aliens;
 
 	std::vector<PlayerData> Leaderboard = { {"Player 1", 500}, {"Player 2", 400}, {"Player 3", 300}, {"Player 4", 200}, {"Player 5", 100} };
 

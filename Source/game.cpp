@@ -9,7 +9,7 @@
 //TODO : Alot of magic numbers
 //TODO : No const correctness
 
-Game::Game() : resources()
+Game::Game() : resources(), background()
 {
 	gameState = State::STARTSCREEN;
 	score = 0;
@@ -47,30 +47,10 @@ Alien::Alien(float x, float y) : position({ x, y }) {
 //TODO : Mixing Initialization and game logic
 void Game::Start()
 {
-	// creating walls 
-	float window_width = (float)GetScreenWidth();
-	float window_height = (float)GetScreenHeight();
-	float wall_distance = window_width / (wallCount + 1);
-	for (size_t i = 0; i < wallCount; i++)
-	{
-		const Vector2 pos = { wall_distance * (i + 1), window_height - GameConstants::Wall::Y_OFFSET };
-		Walls.emplace_back(pos);
-	}
-
-	//TODO : Remove two-step initialization
-	//creating player
 	player = Player(static_cast<float>(GetScreenWidth()));
-
-	//creating aliens
-	SpawnAliens();
-
-	//TODO : Remove two-step initialization
-	//creating background
-	background = Background();
-
-	//reset score
 	score = 0;
-
+	SpawnAliens();
+	SpawnWalls();
 	gameState = State::GAMEPLAY;
 
 }
@@ -79,9 +59,9 @@ void Game::Start()
 void Game::End()
 {
 	//SAVE SCORE AND UPDATE SCOREBOARD
-	Projectiles.clear();
-	Walls.clear();
-	Aliens.clear();
+	projectiles.clear();
+	walls.clear();
+	aliens.clear();
 	newHighScore = CheckNewHighScore();
 	gameState = State::ENDSCREEN;
 }
@@ -176,11 +156,11 @@ void Game::UpdateGameplay()
 	}
 	UpdateEntities();
 	AlienShooting();
-	SpawnAliens();
 	HandlePlayerInput();
 	UpdateBackground();
 	LoseConditions();
 	RemoveInactiveEntities();
+	SpawnNewWave();
 }
 
 void Game::UpdateEndScreen()
@@ -264,20 +244,20 @@ void Game::HandlePlayerInput()
 			player.GetXPos(),
 			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
 		};
-		Projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
+		projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
 
 	}
 	player.Update();
 }
 
 void Game::UpdateEntities() {
-	for (int i = 0; i < Projectiles.size(); i++)
+	for (int i = 0; i < projectiles.size(); i++)
 	{
-		Projectiles[i].Update();
+		projectiles[i].Update();
 	}
-	for (int i = 0; i < Walls.size(); i++)
+	for (int i = 0; i < walls.size(); i++)
 	{
-		Walls[i].Update();
+		walls[i].Update();
 	}
 }
 
@@ -294,11 +274,11 @@ void Game::LoseConditions()
 	{
 		End();
 	}
-	for (int i = 0; i < Aliens.size(); i++)
+	for (int i = 0; i < aliens.size(); i++)
 	{
-		Aliens[i].Update();
+		aliens[i].Update();
 
-		if (Aliens[i].GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
+		if (aliens[i].GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
 		{
 			End();
 		}
@@ -306,27 +286,27 @@ void Game::LoseConditions()
 }
 
 void Game::RemoveInactiveEntities() {
-	for (int i = 0; i < Projectiles.size(); i++)
+	for (int i = 0; i < projectiles.size(); i++)
 	{
-		if (!Projectiles[i].IsActive())
+		if (!projectiles[i].IsActive())
 		{
-			Projectiles.erase(Projectiles.begin() + i);
+			projectiles.erase(projectiles.begin() + i);
 			i--;
 		}
 	}
-	for (int i = 0; i < Aliens.size(); i++)
+	for (int i = 0; i < aliens.size(); i++)
 	{
-		if (!Aliens[i].IsActive())
+		if (!aliens[i].IsActive())
 		{
-			Aliens.erase(Aliens.begin() + i);
+			aliens.erase(aliens.begin() + i);
 			i--;
 		}
 	}
-	for (int i = 0; i < Walls.size(); i++)
+	for (int i = 0; i < walls.size(); i++)
 	{
-		if (!Walls[i].IsActive())
+		if (!walls[i].IsActive())
 		{
-			Walls.erase(Walls.begin() + i);
+			walls.erase(walls.begin() + i);
 			i--;
 		}
 	}
@@ -339,15 +319,34 @@ void Game::AlienShooting() {
 	{
 		int randomAlienIndex = 0;
 
-		if (Aliens.size() > 1)
+		if (aliens.size() > 1)
 		{
-			randomAlienIndex = rand() % Aliens.size();
+			randomAlienIndex = rand() % aliens.size();
 		}
-		Vector2 shootPos = Aliens[randomAlienIndex].GetPosition();
+		Vector2 shootPos = aliens[randomAlienIndex].GetPosition();
 		shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
-		Projectiles.emplace_back(shootPos, EntityType::ALIEN_PROJECTILE, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
+		projectiles.emplace_back(shootPos, EntityType::ALIEN_PROJECTILE, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
 		shootTimer = 0;
 	}
+}
+
+void Game::SpawnWalls()
+{
+	walls.clear();
+	walls.reserve(wallCount);
+	for(size_t i = 0; i < wallCount; i++)
+	{
+		const float x = static_cast<float>((GetScreenWidth() / (wallCount + 1)) * (i + 1));
+		const float y = static_cast<float>(GetScreenHeight() - GameConstants::Wall::Y_OFFSET);
+		walls.emplace_back(Vector2{ x, y });
+	}
+}
+
+void Game::SpawnNewWave() {
+	if (aliens.empty()) {
+		SpawnAliens();
+	}
+
 }
 //TODO : Too long function, break into smaller functions
 void Game::Render()
@@ -378,17 +377,17 @@ void Game::Render()
 		player.Render(resources);
 
 	
-		for(const auto& projectile : Projectiles)
+		for(const auto& projectile : projectiles)
 		{
 			projectile.Render(resources);
 		}
 
-		for(const auto& wall : Walls)
+		for(const auto& wall : walls)
 		{
 			wall.Render(resources);
 		}
 
-		for (const auto& alien : Aliens)
+		for (const auto& alien : aliens)
 		{
 			alien.Render(resources);
 		}
@@ -479,18 +478,24 @@ void Game::Render()
 
 void Game::SpawnAliens()
 {
-	if (Aliens.size() < 1)
-	{
-		using namespace GameConstants::Formation;
-		for (int row = 0; row < HEIGHT; row++) {
-			for (int col = 0; col < WIDTH; col++) {
-				const float x = static_cast<float>(START_X + OFFSET_X + (col * SPACING));
-				const float y = static_cast<float>(START_Y + (row * SPACING));
-				Aliens.emplace_back(x, y);
-			}
+	aliens.clear();
+	aliens.reserve(GameConstants::Formation::WIDTH * GameConstants::Formation::HEIGHT);
+	
+	for (int row = 0; row < GameConstants::Formation::HEIGHT; ++row) {
+		for (int col = 0; col < GameConstants::Formation::WIDTH; ++col) {
+			const float x = static_cast<float>(
+				GameConstants::Formation::START_X +
+				GameConstants::Formation::OFFSET_X +
+				(col * GameConstants::Formation::SPACING)
+				);
+			const float y = static_cast<float>(
+				GameConstants::Formation::START_Y +
+				(row * GameConstants::Formation::SPACING)
+				);
+
+			aliens.emplace_back(x, y);
 		}
 	}
-	
 
 }
 
