@@ -18,9 +18,9 @@ enum struct State
 enum struct EntityType
 {
 	PLAYER,
-	ENEMY,
+	ALIEN,
 	PLAYER_PROJECTILE,
-	ENEMY_PROJECTILE
+	ALIEN_PROJECTILE
 };
 
 struct PlayerData
@@ -138,6 +138,17 @@ struct Game
 {
 private:
 	Resources resources;
+
+	void UpdateStartScreen();
+	void UpdateGameplay();
+	void UpdateEndScreen();
+	void HandlePlayerInput();
+	void UpdateEntities();
+	void UpdateBackground();
+	void LoseConditions();
+	void RemoveInactiveEntities();
+	void AlienShooting();
+
 public:
 	// Gamestate
 	State gameState = {};

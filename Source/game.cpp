@@ -98,68 +98,11 @@ void Game::Update()
 	switch (gameState)
 	{
 	case State::STARTSCREEN:
-		//Code 
-		if (IsKeyReleased(KEY_SPACE))
-		{
-			Start();
-
-
-		}
-
+		
+		UpdateStartScreen();
 		break;
 	case State::GAMEPLAY:
-		//Code
-		if (IsKeyReleased(KEY_Q))
-		{
-			End();
-		}
-
-		//Update Player
-		player.Update();
-		//TODO: Extract function
-		//Update Aliens and Check if they are past player
-		for (int i = 0; i < Aliens.size(); i++)
-		{
-			Aliens[i].Update();
-
-			if (Aliens[i].GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
-			{
-				End();
-			}
-		}
-		//TODO: Extract function
-		//End game if player dies
-		if (player.lives < 1)
-		{
-			End();
-		}
-		//TODO: Extract function
-		//Spawn new aliens if aliens run out
-		if (Aliens.size() < 1)
-		{
-			SpawnAliens();
-		}
-
-		//TODO: Extract function
-		// Update background with offset
-		playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
-		cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
-		offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
-		background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
-
-		//TODO: Extract function
-		//UPDATE PROJECTILE
-		for (int i = 0; i < Projectiles.size(); i++)
-		{
-			Projectiles[i].Update();
-		}
-		//TODO: Extract function
-		//UPDATE PROJECTILE
-		for (int i = 0; i < Walls.size(); i++)
-		{
-			Walls[i].Update();
-		}
-
+		UpdateGameplay();
 		//CHECK ALL COLLISONS HERE
 		//TODO : Breaking law of Demeter
 		//TODO: Extract function
@@ -185,7 +128,7 @@ void Game::Update()
 			//TODO: Extract function
 			for (int j = 0; j < Projectiles.size(); j++)
 			{
-				if (Projectiles[j].GetType() == EntityType::ENEMY_PROJECTILE)
+				if (Projectiles[j].GetType() == EntityType::ALIEN_PROJECTILE)
 				{
 					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT }, GameConstants::Player::BASE_HEIGHT, Projectiles[j].GetLineStart(), Projectiles[j].GetLineEnd()))
 					{
@@ -210,149 +153,202 @@ void Game::Update()
 			}
 		}
 
-		//MAKE PROJECTILE
-		//TODO: Extract function
-		if (IsKeyPressed(KEY_SPACE))
-		{
-			const Vector2 startPos = {
-				player.GetXPos(),
-				static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
-			};
-			Projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
-
-		}
-
-		//Aliens Shooting
-		//TODO: Extract function
-		shootTimer += 1;
-		if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES) //once per second
-		{
-			int randomAlienIndex = 0;
-
-			if (Aliens.size() > 1)
-			{
-				randomAlienIndex = rand() % Aliens.size();
-			}
-			Vector2 shootPos = Aliens[randomAlienIndex].GetPosition();
-			shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
-			Projectiles.emplace_back(shootPos, EntityType::ENEMY_PROJECTILE, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
-			shootTimer = 0;
-		}
-
-		// REMOVE INACTIVE/DEAD ENITITIES
-		//TODO: Extract function
-		for (int i = 0; i < Projectiles.size(); i++)
-		{
-			if (!Projectiles[i].IsActive())
-			{
-				Projectiles.erase(Projectiles.begin() + i);
-				i--;
-			}
-		}
-		for (int i = 0; i < Aliens.size(); i++)
-		{
-			if (!Aliens[i].IsActive())
-			{
-				Aliens.erase(Aliens.begin() + i);
-				i--;
-			}
-		}
-		for (int i = 0; i < Walls.size(); i++)
-		{
-			if (!Walls[i].IsActive())
-			{
-				Walls.erase(Walls.begin() + i);
-				i--;
-			}
-		}
-
-
-
-
 		break;
-		//TODO : Mixing game logic with UI logic
 	case State::ENDSCREEN:
-		//Code
-
-		//Exit endscreen
-		if (IsKeyReleased(KEY_ENTER) && !newHighScore)
-		{
-			Continue();
-		}
-
-
-
-		if (newHighScore)
-		{
-			using namespace GameConstants::UI::EndScreen::NameEntry;
-			if (CheckCollisionPointRec(GetMousePosition(), { TEXTBOX_X,TEXTBOX_Y,TEXTBOX_WIDTH,TEXTBOX_HEIGHT })) mouseOnText = true;
-			else mouseOnText = false;
-
-			if (mouseOnText)
-			{
-				// Set the window's cursor to the I-Beam
-				SetMouseCursor(MOUSE_CURSOR_IBEAM);
-
-				// Get char pressed on the queue
-				int key = GetCharPressed();
-
-				// Check if more characters have been pressed on the same frame
-				while (key > 0)
-				{
-					// NOTE: Only allow keys in range [32..125]
-					if ((key >= 32) && (key <= 125) && (letterCount < GameConstants::UI::MAX_NAME_CHARS))
-					{
-						//TODO : Remove c-style string manipulation with char array
-						name[letterCount] = (char)key;
-						name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-						letterCount++;
-					}
-
-					key = GetCharPressed();  // Check next character in the queue
-				}
-
-				//Remove chars 
-				if (IsKeyPressed(KEY_BACKSPACE))
-				{
-					letterCount--;
-					if (letterCount < 0) letterCount = 0;
-					name[letterCount] = '\0';
-				}
-			}
-			else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-
-			if (mouseOnText)
-			{
-				framesCounter++;
-			}
-			else
-			{
-				framesCounter = 0;
-			}
-
-			// If the name is right legth and enter is pressed, exit screen by setting highscore to false and add 
-			// name + score to scoreboard
-			if (letterCount > 0 && letterCount < GameConstants::UI::MAX_NAME_CHARS && IsKeyReleased(KEY_ENTER))
-			{
-				std::string nameEntry(name);
-
-				InsertNewHighScore(nameEntry);
-
-				newHighScore = false;
-			}
-
-
-		}
-
-
-
+		UpdateEndScreen();
 		break;
 	default:
-		//SHOULD NOT HAPPEN
 		break;
 	}
 }
 
+void Game::UpdateStartScreen()
+{
+	if (IsKeyReleased(KEY_SPACE))Start();
+}
+
+void Game::UpdateGameplay()
+{
+	if (IsKeyReleased(KEY_Q))
+	{
+		End();
+		return;
+	}
+	UpdateEntities();
+	AlienShooting();
+	SpawnAliens();
+	HandlePlayerInput();
+	UpdateBackground();
+	LoseConditions();
+	RemoveInactiveEntities();
+}
+
+void Game::UpdateEndScreen()
+{
+	if (IsKeyReleased(KEY_ENTER) && !newHighScore)
+	{
+		Continue();
+	}
+
+
+
+	if (newHighScore)
+	{
+		using namespace GameConstants::UI::EndScreen::NameEntry;
+		if (CheckCollisionPointRec(GetMousePosition(), { TEXTBOX_X,TEXTBOX_Y,TEXTBOX_WIDTH,TEXTBOX_HEIGHT })) mouseOnText = true;
+		else mouseOnText = false;
+
+		if (mouseOnText)
+		{
+			// Set the window's cursor to the I-Beam
+			SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+			// Get char pressed on the queue
+			int key = GetCharPressed();
+
+			// Check if more characters have been pressed on the same frame
+			while (key > 0)
+			{
+				// NOTE: Only allow keys in range [32..125]
+				if ((key >= 32) && (key <= 125) && (letterCount < GameConstants::UI::MAX_NAME_CHARS))
+				{
+					//TODO : Remove c-style string manipulation with char array
+					name[letterCount] = (char)key;
+					name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+					letterCount++;
+				}
+
+				key = GetCharPressed();  // Check next character in the queue
+			}
+
+			//Remove chars 
+			if (IsKeyPressed(KEY_BACKSPACE))
+			{
+				letterCount--;
+				if (letterCount < 0) letterCount = 0;
+				name[letterCount] = '\0';
+			}
+		}
+		else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+		if (mouseOnText)
+		{
+			framesCounter++;
+		}
+		else
+		{
+			framesCounter = 0;
+		}
+
+		if (letterCount > 0 && letterCount < GameConstants::UI::MAX_NAME_CHARS && IsKeyReleased(KEY_ENTER))
+		{
+			std::string nameEntry(name);
+
+			InsertNewHighScore(nameEntry);
+
+			newHighScore = false;
+		}
+
+
+	}
+
+
+
+}
+
+void Game::HandlePlayerInput()
+{
+	if (IsKeyPressed(KEY_SPACE))
+	{
+		const Vector2 startPos = {
+			player.GetXPos(),
+			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
+		};
+		Projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
+
+	}
+	player.Update();
+}
+
+void Game::UpdateEntities() {
+	for (int i = 0; i < Projectiles.size(); i++)
+	{
+		Projectiles[i].Update();
+	}
+	for (int i = 0; i < Walls.size(); i++)
+	{
+		Walls[i].Update();
+	}
+}
+
+void Game::UpdateBackground() {
+	playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
+	cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
+	offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
+	background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
+}
+
+void Game::LoseConditions()
+{
+	if (player.lives < 1)
+	{
+		End();
+	}
+	for (int i = 0; i < Aliens.size(); i++)
+	{
+		Aliens[i].Update();
+
+		if (Aliens[i].GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
+		{
+			End();
+		}
+	}
+}
+
+void Game::RemoveInactiveEntities() {
+	for (int i = 0; i < Projectiles.size(); i++)
+	{
+		if (!Projectiles[i].IsActive())
+		{
+			Projectiles.erase(Projectiles.begin() + i);
+			i--;
+		}
+	}
+	for (int i = 0; i < Aliens.size(); i++)
+	{
+		if (!Aliens[i].IsActive())
+		{
+			Aliens.erase(Aliens.begin() + i);
+			i--;
+		}
+	}
+	for (int i = 0; i < Walls.size(); i++)
+	{
+		if (!Walls[i].IsActive())
+		{
+			Walls.erase(Walls.begin() + i);
+			i--;
+		}
+	}
+
+}
+
+void Game::AlienShooting() {
+	shootTimer += 1;
+	if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES) //once per second
+	{
+		int randomAlienIndex = 0;
+
+		if (Aliens.size() > 1)
+		{
+			randomAlienIndex = rand() % Aliens.size();
+		}
+		Vector2 shootPos = Aliens[randomAlienIndex].GetPosition();
+		shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
+		Projectiles.emplace_back(shootPos, EntityType::ALIEN_PROJECTILE, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
+		shootTimer = 0;
+	}
+}
 //TODO : Too long function, break into smaller functions
 void Game::Render()
 {
@@ -483,14 +479,18 @@ void Game::Render()
 
 void Game::SpawnAliens()
 {
-	using namespace GameConstants::Formation;
-	for (int row = 0; row < HEIGHT; row++) {
-		for (int col = 0; col < WIDTH; col++) {
-			const float x = static_cast<float>(START_X + OFFSET_X + (col * SPACING));
-			const float y = static_cast<float>(START_Y + (row * SPACING));
-			Aliens.emplace_back(x, y);
+	if (Aliens.size() < 1)
+	{
+		using namespace GameConstants::Formation;
+		for (int row = 0; row < HEIGHT; row++) {
+			for (int col = 0; col < WIDTH; col++) {
+				const float x = static_cast<float>(START_X + OFFSET_X + (col * SPACING));
+				const float y = static_cast<float>(START_Y + (row * SPACING));
+				Aliens.emplace_back(x, y);
+			}
 		}
 	}
+	
 
 }
 
