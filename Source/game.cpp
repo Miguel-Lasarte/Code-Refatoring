@@ -6,8 +6,6 @@
 #include <fstream>
 #pragma warning (push)
 #pragma warning(disable : 26446)
-
-
 //TODO : Alot of magic numbers
 //TODO : No const correctness
 
@@ -16,6 +14,26 @@ Game::Game() : resources()
 	gameState = State::STARTSCREEN;
 	score = 0;
 }
+
+Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
+}
+
+Star::Star(Vector2 pos, float size) : initPosition(pos), position(pos), size(size) {
+}
+
+Background::Background() {
+	stars.reserve(GameConstants::Background::STAR_COUNT);
+
+	for (int i = 0; i < GameConstants::Background::STAR_COUNT; ++i) {
+		const Vector2 pos = {
+			static_cast<float>(GetRandomValue(-GameConstants::Background::Stars::SPAWN_OFFSET, GetScreenWidth() + GameConstants::Background::Stars::SPAWN_OFFSET)),
+			static_cast<float>(GetRandomValue(0,GetRenderHeight()))
+		};
+		const float size = static_cast<float>(GetRandomValue(GameConstants::Background::Stars::MIN_SIZE, GameConstants::Background::Stars::MAX_SIZE)) / GameConstants::Background::Stars::SIZE_DIVISOR;
+		stars.emplace_back(pos, size);
+	}
+}
+
 //TODO : Mixing Initialization and game logic
 void Game::Start()
 {
@@ -42,9 +60,7 @@ void Game::Start()
 
 	//TODO : Remove two-step initialization
 	//creating background
-	Background newBackground;
-	newBackground.Initialize(GameConstants::Background::STAR_COUNT);
-	background = newBackground;
+	background = Background();
 
 	//reset score
 	score = 0;
@@ -69,8 +85,6 @@ void Game::Continue()
 	SaveLeaderboard();
 	gameState = State::STARTSCREEN;
 }
-
-
 
 //TODO : Too long function, break into smaller functions
 void Game::Update()
@@ -122,7 +136,7 @@ void Game::Update()
 
 		//TODO: Extract function
 		// Update background with offset
-		playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT};
+		playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
 		cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
 		offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
 		background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
@@ -167,7 +181,7 @@ void Game::Update()
 			{
 				if (Projectiles[j].type == EntityType::ENEMY_PROJECTILE)
 				{
-					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT}, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
+					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT }, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
 					{
 						std::cout << "dead!\n";
 						Projectiles[j].active = false;
@@ -564,10 +578,6 @@ void Game::SaveLeaderboard()
 	// CLOSE FILE
 }
 
-//TODO : Two step initialization
-Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
-}
-
 void Player::Update()
 {
 	using namespace GameConstants::Player;
@@ -612,8 +622,6 @@ void Player::Render(Texture2D resources)
 		0,
 		WHITE);
 }
-
-
 
 void Projectile::Update()
 {
@@ -751,57 +759,39 @@ void Alien::Render(Texture2D texture)
 }
 
 //BACKGROUND
-void Star::Update(float starOffset)
+void Star::Update(float offset)
 {
-	position.x = initPosition.x + starOffset;
+	position.x = initPosition.x + offset;
 	position.y = initPosition.y;
 
 }
 
-void Star::Render()
+void Star::Render() const
 {
-	DrawCircle((int)position.x, (int)position.y, size, color);
-}
-
-//TODO : Two step initialization
-void Background::Initialize(int starAmount)
-{
-	using namespace GameConstants::Background;
-
-	for (int i = 0; i < starAmount; i++)
-	{
-		Star newStar;
-
-		newStar.initPosition.x = static_cast<float>(GetRandomValue(-Stars::SPAWN_OFFSET, GetScreenWidth() + Stars::SPAWN_OFFSET));
-		newStar.initPosition.y = static_cast<float>(GetRandomValue(0, GetScreenHeight()));
-
-		//random color?
-		newStar.color = SKYBLUE;
-
-		newStar.size = static_cast<float>(GetRandomValue(Stars::MIN_SIZE, Stars::MAX_SIZE) / Stars::SIZE_DIVISOR);
-
-		Stars.push_back(newStar);
-
-	}
+	DrawCircle(
+		static_cast<int>(position.x),
+		static_cast<int>(position.y),
+		size,
+		color
+	);
 }
 
 void Background::Update(float offset)
 {
-	for (int i = 0; i < Stars.size(); i++)
+	for(auto& star : stars)
 	{
-		Stars[i].Update(offset);
+		star.Update(offset);
 	}
 
 }
 
-void Background::Render()
+void Background::Render() const
 {
-	for (int i = 0; i < Stars.size(); i++)
+	for (const auto& star : stars)
 	{
-		Stars[i].Render();
+		star.Render();
 	}
 }
-
 
 #pragma warning (pop)
 

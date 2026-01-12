@@ -46,17 +46,17 @@ public:
 	void Render(Texture2D resources);
 	[[nodiscard]] float GetXPos() const noexcept { return xPos; }
 	[[nodiscard]] Vector2 GetPosition() const noexcept {
-		return { xPos,static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT};
+		return { xPos,static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
 	}
 	[[nodiscard]] size_t GetActiveTextureIndex() const noexcept { return activeTexture; }
 };
 
 struct Projectile
 {
-public: 
+public:
 	// INITIALIZE PROJECTILE WHILE DEFINING IF ITS PLAYER OR ENEMY 
-	Vector2 position = {0,0};
-	bool active = true; 
+	Vector2 position = { 0,0 };
+	bool active = true;
 	float speed = GameConstants::Projectile::SPEED;
 	EntityType type = {};
 
@@ -69,65 +69,67 @@ public:
 	void Render(Texture2D texture);
 };
 
-struct Wall 
+struct Wall
 {
-public: 
-	Vector2 position; 
+public:
+	Vector2 position;
 	//TODO Unused Rectangle variable
-	Rectangle rec; 
-	bool active; 
-	Color color; 
+	Rectangle rec;
+	bool active;
+	Color color;
 	int health = GameConstants::Wall::INITIAL_HEALTH;
 
 
-	void Render(Texture2D texture); 
-	void Update(); 
+	void Render(Texture2D texture);
+	void Update();
 };
 
 struct Alien
 {
 public:
-	
-	Color color = WHITE; 
-	Vector2 position = {0, 0};
-	//TODO : Unused x and y variables
-	int x = 0; 
-	int y = 0; 
-	bool active = true;  
-	bool moveRight = true; 
-	
-	EntityType type = EntityType::ENEMY; 
 
-		 
-	void Update(); 
-	void Render(Texture2D texture); 
-};
-
-
-struct Star
-{
-	Vector2 initPosition = { 0, 0 };
+	Color color = WHITE;
 	Vector2 position = { 0, 0 };
-	Color color = GRAY;
-	float size = 0;
-	void Update(float starOffset);
-	void Render();
+	//TODO : Unused x and y variables
+	int x = 0;
+	int y = 0;
+	bool active = true;
+	bool moveRight = true;
+
+	EntityType type = EntityType::ENEMY;
+
+
+	void Update();
+	void Render(Texture2D texture);
 };
 
-struct Background
+class Star
 {
-	
+private:
+	Vector2 initPosition = { 0.f, 0.f };
+	Vector2 position = { 0.f, 0.f };
+	Color color = GRAY;
+	float size = 0.f;
+public:
+	Star(Vector2 pos, float size);
+	void Update(float fffset);
+	void Render() const;
+};
 
-	std::vector<Star> Stars;
-
-	void Initialize(int starAmount);
+class Background
+{
+private:
+	std::vector<Star> stars;
+public:
+	Background();
 	void Update(float offset);
-	void Render();
+	void Render() const;
 
 };
 
 struct Game
-{private:
+{
+private:
 	Resources resources;
 public:
 	// Gamestate
@@ -143,16 +145,16 @@ public:
 	float shootTimer = 0;
 
 	//Aliens stuff? (idk cause liv wrote this)
-	Rectangle rec = { 0, 0 ,0 ,0 }; 
+	Rectangle rec = { 0, 0 ,0 ,0 };
 
 	bool newHighScore = false;
-	
+
 	Game();
 	void Start();
 	void End();
 
 	void Continue();
-	
+
 
 	void Update();
 	void Render();
@@ -175,13 +177,13 @@ public:
 	std::vector<Alien> Aliens;
 
 	std::vector<PlayerData> Leaderboard = { {"Player 1", 500}, {"Player 2", 400}, {"Player 3", 300}, {"Player 4", 200}, {"Player 5", 100} };
-	
+
 	Background background;
 
 
 
 	Vector2 playerPos;
-	Vector2 alienPos; 
+	Vector2 alienPos;
 	Vector2 cornerPos;
 	float offset;
 
