@@ -44,7 +44,6 @@ Wall::Wall(Vector2 pos) : position(pos) {
 Alien::Alien(float x, float y) : position({ x, y }) {
 }
 
-//TODO : Mixing Initialization and game logic
 void Game::Start()
 {
 	player = Player(static_cast<float>(GetScreenWidth()));
@@ -72,13 +71,12 @@ void Game::Continue()
 	gameState = State::STARTSCREEN;
 }
 
-//TODO : Too long function, break into smaller functions
 void Game::Update()
 {
 	switch (gameState)
 	{
 	case State::STARTSCREEN:
-		
+
 		UpdateStartScreen();
 		break;
 	case State::GAMEPLAY:
@@ -286,12 +284,35 @@ void Game::SpawnWalls()
 {
 	walls.clear();
 	walls.reserve(wallCount);
-	for(size_t i = 0; i < wallCount; i++)
+	for (size_t i = 0; i < wallCount; i++)
 	{
 		const float x = static_cast<float>((GetScreenWidth() / (wallCount + 1)) * (i + 1));
 		const float y = static_cast<float>(GetScreenHeight() - GameConstants::Wall::Y_OFFSET);
 		walls.emplace_back(Vector2{ x, y });
 	}
+}
+
+void Game::SpawnAliens()
+{
+	aliens.clear();
+	aliens.reserve(GameConstants::Formation::WIDTH * GameConstants::Formation::HEIGHT);
+
+	for (int row = 0; row < GameConstants::Formation::HEIGHT; ++row) {
+		for (int col = 0; col < GameConstants::Formation::WIDTH; ++col) {
+			const float x = static_cast<float>(
+				GameConstants::Formation::START_X +
+				GameConstants::Formation::OFFSET_X +
+				(col * GameConstants::Formation::SPACING)
+				);
+			const float y = static_cast<float>(
+				GameConstants::Formation::START_Y +
+				(row * GameConstants::Formation::SPACING)
+				);
+
+			aliens.emplace_back(x, y);
+		}
+	}
+
 }
 
 void Game::SpawnNewWave() {
@@ -316,7 +337,7 @@ void Game::CheckPlayerProjectileCollisions()
 		for (auto& alien : aliens) {
 			if (!alien.IsActive()) continue;
 
-			if(CollisionSystem::CheckCollision(alien.GetPosition(), GameConstants::Alien::RADIUS, projectile.GetLineStart(), projectile.GetLineEnd()))
+			if (CollisionSystem::CheckCollision(alien.GetPosition(), GameConstants::Alien::RADIUS, projectile.GetLineStart(), projectile.GetLineEnd()))
 			{
 				// Handle collision
 				projectile.SetInactive();
@@ -325,7 +346,7 @@ void Game::CheckPlayerProjectileCollisions()
 				break;
 			}
 		}
-		
+
 	}
 }
 
@@ -333,7 +354,7 @@ void Game::CheckAlienProjectileCollisions()
 {
 	const Vector2 playerPosition = { player.GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
 
-	for(auto& projectile : projectiles)
+	for (auto& projectile : projectiles)
 	{
 		if (projectile.GetType() != EntityType::ALIEN_PROJECTILE || !projectile.IsActive()) continue;
 		if (CollisionSystem::CheckCollision(playerPosition, GameConstants::Player::BASE_HEIGHT, projectile.GetLineStart(), projectile.GetLineEnd()))
@@ -360,155 +381,126 @@ void Game::CheckWallCollisions() {
 		}
 	}
 }
-//TODO : Too long function, break into smaller functions
-void Game::Render()
+
+void Game::Render() const
 {
-	using namespace GameConstants::UI;
+
 	switch (gameState)
 	{
 	case State::STARTSCREEN:
-		//Code
-		DrawText("SPACE INVADERS", StartScreen::TITLE_X, StartScreen::TITLE_Y, StartScreen::TITLE_SIZE, YELLOW);
-
-		DrawText("PRESS SPACE TO BEGIN", StartScreen::PROMPT_X, StartScreen::PROMPT_Y, StartScreen::PROMPT_SIZE, YELLOW);
-
-
+		RenderStart();
 		break;
 	case State::GAMEPLAY:
-		//Code
-
-
-		//background render LEAVE THIS AT TOP
-		background.Render();
-
-		//DrawText("GAMEPLAY", 50, 30, 40, YELLOW);
-		DrawText(TextFormat("Score: %i", score), HUD::SCORE_X, HUD::SCORE_Y, HUD::TEXT_SIZE, YELLOW);
-		DrawText(TextFormat("Lives: %i", player.lives), HUD::LIVES_X, HUD::LIVES_Y, HUD::TEXT_SIZE, YELLOW);
-
-		
-		player.Render(resources);
-
-	
-		for(const auto& projectile : projectiles)
-		{
-			projectile.Render(resources);
-		}
-
-		for(const auto& wall : walls)
-		{
-			wall.Render(resources);
-		}
-
-		for (const auto& alien : aliens)
-		{
-			alien.Render(resources);
-		}
-
-
-
+		RenderGameplay();
 		break;
 	case State::ENDSCREEN:
-		//Code
-		//DrawText("END", 50, 50, 40, YELLOW);
-
-
-
-		if (newHighScore)
-		{
-			DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y, EndScreen::HIGHSCORE_SIZE, YELLOW);
-
-
-			using namespace GameConstants::UI::EndScreen::NameEntry;
-			// BELOW CODE IS FOR NAME INPUT RENDER
-			DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
-
-			DrawRectangle(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, LIGHTGRAY);
-			if (mouseOnText)
-			{
-				// HOVER CONFIRMIATION
-				DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, RED);
-			}
-			else
-			{
-				DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, DARKGRAY);
-			}
-
-			//Draw the name being typed out
-			DrawText(name, TEXTBOX_X + TEXT_X_OFFSET, TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
-
-			//Draw the text explaining how many characters are used
-			DrawText(TextFormat("INPUT CHARS: %i/%i", letterCount, MAX_NAME_LENGTH), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
-
-			if (mouseOnText)
-			{
-				if (letterCount < MAX_NAME_CHARS)
-				{
-					// Draw blinking underscore char
-					if (((framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2) == 0)
-					{
-						DrawText("_", TEXTBOX_X + TEXT_X_OFFSET + MeasureText(name, TEXT_SIZE), TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
-					}
-
-				}
-				else
-				{
-					//Name needs to be shorter
-					DrawText("Press BACKSPACE to delete chars...", TEXTBOX_X, BACKSPACE_PROMPT_Y, PROMPT_SIZE, YELLOW);
-				}
-
-			}
-
-			// Explain how to continue when name is input
-			if (letterCount > 0 && letterCount < MAX_NAME_CHARS)
-			{
-				DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y, EndScreen::CONTINUE_SIZE, YELLOW);
-			}
-
-		}
-		else {
-			// If no highscore or name is entered, show scoreboard and call it a day
-			DrawText("PRESS ENTER TO CONTINUE", EndScreen::HIGHSCORE_X, EndScreen::CONTINUE_Y, EndScreen::CONTINUE_SIZE, YELLOW);
-
-			DrawText("LEADERBOARD", Leaderboard::TITLE_X, Leaderboard::TITLE_Y, HUD::TEXT_SIZE, YELLOW);
-
-			for (int i = 0; i < Leaderboard.size(); i++)
-			{
-				char* tempNameDisplay = Leaderboard[i].name.data();
-				DrawText(tempNameDisplay, Leaderboard::NAME_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-				DrawText(TextFormat("%i", Leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-			}
-		}
-
-
-
+		RenderEnd();
 		break;
 	default:
-		//SHOULD NOT HAPPEN
+
 		break;
 	}
 }
 
-void Game::SpawnAliens()
-{
-	aliens.clear();
-	aliens.reserve(GameConstants::Formation::WIDTH * GameConstants::Formation::HEIGHT);
-	
-	for (int row = 0; row < GameConstants::Formation::HEIGHT; ++row) {
-		for (int col = 0; col < GameConstants::Formation::WIDTH; ++col) {
-			const float x = static_cast<float>(
-				GameConstants::Formation::START_X +
-				GameConstants::Formation::OFFSET_X +
-				(col * GameConstants::Formation::SPACING)
-				);
-			const float y = static_cast<float>(
-				GameConstants::Formation::START_Y +
-				(row * GameConstants::Formation::SPACING)
-				);
+void Game::RenderStart() const {
+	using namespace GameConstants::UI;
 
-			aliens.emplace_back(x, y);
-		}
+	DrawText("SPACE INVADERS", StartScreen::TITLE_X, StartScreen::TITLE_Y, StartScreen::TITLE_SIZE, YELLOW);
+
+	DrawText("PRESS SPACE TO BEGIN", StartScreen::PROMPT_X, StartScreen::PROMPT_Y, StartScreen::PROMPT_SIZE, YELLOW);
+
+
+}
+
+void Game::RenderGameplay() const {
+
+	using namespace GameConstants::UI::HUD;
+	background.Render();
+
+	DrawText(TextFormat("Score: %i", score), SCORE_X, SCORE_Y, TEXT_SIZE, YELLOW);
+	DrawText(TextFormat("Lives: %i", player.lives), LIVES_X, LIVES_Y, TEXT_SIZE, YELLOW);
+
+
+	player.Render(resources);
+
+
+	for (const auto& projectile : projectiles)
+	{
+		projectile.Render(resources);
 	}
 
+	for (const auto& wall : walls)
+	{
+		wall.Render(resources);
+	}
+
+	for (const auto& alien : aliens)
+	{
+		alien.Render(resources);
+	}
+
+
+}
+
+void Game::RenderEnd() const {
+	using namespace GameConstants::UI;
+	if (newHighScore)
+	{
+		DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y, EndScreen::HIGHSCORE_SIZE, YELLOW);
+
+
+		using namespace GameConstants::UI::EndScreen::NameEntry;
+		DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
+
+		DrawRectangle(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, LIGHTGRAY);
+		if (mouseOnText)
+		{
+			DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, RED);
+		}
+		else
+		{
+			DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, DARKGRAY);
+		}
+
+		DrawText(name, TEXTBOX_X + TEXT_X_OFFSET, TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
+
+		DrawText(TextFormat("INPUT CHARS: %i/%i", letterCount, MAX_NAME_LENGTH), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
+
+		if (mouseOnText)
+		{
+			if (letterCount < MAX_NAME_CHARS)
+			{
+				if (((framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2) == 0)
+				{
+					DrawText("_", TEXTBOX_X + TEXT_X_OFFSET + MeasureText(name, TEXT_SIZE), TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
+				}
+
+			}
+			else
+			{
+				DrawText("Press BACKSPACE to delete chars...", TEXTBOX_X, BACKSPACE_PROMPT_Y, PROMPT_SIZE, YELLOW);
+			}
+
+		}
+
+		if (letterCount > 0 && letterCount < MAX_NAME_CHARS)
+		{
+			DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y, EndScreen::CONTINUE_SIZE, YELLOW);
+		}
+
+	}
+	else {
+		DrawText("PRESS ENTER TO CONTINUE", EndScreen::HIGHSCORE_X, EndScreen::CONTINUE_Y, EndScreen::CONTINUE_SIZE, YELLOW);
+
+		DrawText("LEADERBOARD", Leaderboard::TITLE_X, Leaderboard::TITLE_Y, HUD::TEXT_SIZE, YELLOW);
+
+		for (int i = 0; i < Leaderboard.size(); i++)
+		{
+			const char* tempNameDisplay = Leaderboard[i].name.data();
+			DrawText(tempNameDisplay, Leaderboard::NAME_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
+			DrawText(TextFormat("%i", Leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
+		}
+	}
 }
 
 bool Game::CheckNewHighScore()
@@ -705,6 +697,7 @@ void Wall::Update()
 
 
 }
+
 void Wall::takeDamage() noexcept
 {
 	health--;
@@ -739,7 +732,7 @@ void Alien::Update()
 void Alien::Render(const Resources& resources) const
 {
 	using namespace GameConstants::Alien::Rendering;
-	
+
 	DrawTexturePro(resources.GetAlienTexture(),
 		{
 			0,
@@ -757,7 +750,6 @@ void Alien::Render(const Resources& resources) const
 		WHITE);
 }
 
-//BACKGROUND
 void Star::Update(float offset)
 {
 	position.x = initPosition.x + offset;

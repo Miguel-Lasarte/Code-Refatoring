@@ -155,6 +155,10 @@ private:
 	void CheckPlayerProjectileCollisions();
 	void CheckAlienProjectileCollisions();
 	void CheckWallCollisions();
+
+	void RenderStart() const;
+	void RenderGameplay() const;
+	void RenderEnd() const;
 public:
 	// Gamestate
 	State gameState = {};
@@ -181,7 +185,7 @@ public:
 
 
 	void Update();
-	void Render();
+	void Render() const;
 
 	void SpawnAliens();
 
