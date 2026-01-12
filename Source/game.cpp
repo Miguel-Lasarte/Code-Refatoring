@@ -35,9 +35,7 @@ void Game::Start()
 
 	//TODO : Remove two-step initialization
 	//creating player
-	Player newPlayer;
-	player = newPlayer;
-	player.Initialize();
+	player = Player(static_cast<float>(GetScreenWidth()));
 
 	//creating aliens
 	SpawnAliens();
@@ -124,7 +122,7 @@ void Game::Update()
 
 		//TODO: Extract function
 		// Update background with offset
-		playerPos = { player.x_pos, GameConstants::Player::BASE_HEIGHT };
+		playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT};
 		cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
 		offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
 		background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
@@ -169,7 +167,7 @@ void Game::Update()
 			{
 				if (Projectiles[j].type == EntityType::ENEMY_PROJECTILE)
 				{
-					if (CollisionSystem::CheckCollision({player.x_pos, GetScreenHeight() - GameConstants::Player::BASE_HEIGHT}, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
+					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT}, GameConstants::Player::BASE_HEIGHT, Projectiles[j].lineStart, Projectiles[j].lineEnd))
 					{
 						std::cout << "dead!\n";
 						Projectiles[j].active = false;
@@ -198,7 +196,7 @@ void Game::Update()
 		{
 			float window_height = static_cast<float>(GetScreenHeight());
 			Projectile newProjectile;
-			newProjectile.position.x = player.x_pos;
+			newProjectile.position.x = player.GetXPos();
 			newProjectile.position.y = window_height - GameConstants::Player::Shooting::SPAWN_Y_OFFSET;
 
 			newProjectile.type = EntityType::PLAYER_PROJECTILE;
@@ -368,7 +366,7 @@ void Game::Render()
 		DrawText(TextFormat("Lives: %i", player.lives), HUD::LIVES_X, HUD::LIVES_Y, HUD::TEXT_SIZE, YELLOW);
 
 		//player rendering 
-		player.Render(resources.GetShipTexture(player.activeTexture));
+		player.Render(resources.GetShipTexture(player.GetActiveTextureIndex()));
 
 		//projectile rendering
 		for (int i = 0; i < Projectiles.size(); i++)
@@ -504,9 +502,9 @@ bool Game::CheckNewHighScore()
 
 void Game::InsertNewHighScore(std::string playerName)
 {
-    PlayerData newData;
-    newData.name = playerName;
-    newData.score = score;
+	PlayerData newData;
+	newData.name = playerName;
+	newData.score = score;
 
 	//TODO : use a algorithm for the manual loop
 	for (size_t i = 0; i < Leaderboard.size(); i++)
@@ -567,66 +565,39 @@ void Game::SaveLeaderboard()
 }
 
 //TODO : Two step initialization
-void Player::Initialize()
-{
-	//TODO : pass in screen width as parameter
-	float window_width = (float)GetScreenWidth();
-	x_pos = window_width / 2.0f;
-	//TODO : Remove debug print statements
-	std::cout << "Find Player -X:" << GetScreenWidth() / 2 << "Find Player -Y" << GetScreenHeight() - GameConstants::Player::BASE_HEIGHT << std::endl;
-
+Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 }
 
 void Player::Update()
 {
 	using namespace GameConstants::Player;
-	//Movement
 	direction = 0;
-	if (IsKeyDown(KEY_LEFT))
-	{
-		direction--;
-	}
-	if (IsKeyDown(KEY_RIGHT))
-	{
-		direction++;
-	}
+	if (IsKeyDown(KEY_LEFT)) direction--;
 
-	x_pos += SPEED * direction;
+	if (IsKeyDown(KEY_RIGHT)) direction++;
 
-	if (x_pos < 0 + RADIUS)
-	{
-		x_pos = 0 + RADIUS;
-	}
-	else if (x_pos > GetScreenWidth() - RADIUS)
-	{
-		x_pos = GetScreenWidth() - RADIUS;
-	}
+	xPos += SPEED * static_cast<float>(direction);
 
+	const float minX = RADIUS;
+	const float maxX = static_cast<float>(GetScreenWidth()) - RADIUS;
 
-	//Determine frame for animation
+	if (xPos < minX) xPos = minX;
+	else if (xPos > maxX) xPos = maxX;
+
 	timer += GetFrameTime();
-
-	if (timer > Animation::INTERVAL && activeTexture == 2)
+	if (timer >= Animation::INTERVAL)
 	{
-		activeTexture = 0;
-		timer = 0;
+		activeTexture = (activeTexture + 1) % Rendering::TEXTURE_COUNT;
+		timer = 0.f;
 	}
-	else if (timer > Animation::INTERVAL)
-	{
-		activeTexture++;
-		timer = 0;
-	}
-
-
 }
 
-//TODO : Player dont need to know about texture details
-void Player::Render(Texture2D texture)
+void Player::Render(Texture2D resources)
 {
 	using namespace GameConstants::Player;
 	float window_height = static_cast<float>(GetScreenHeight());
 
-	DrawTexturePro(texture,
+	DrawTexturePro(resources,
 		{
 			0,
 			0,
@@ -634,7 +605,7 @@ void Player::Render(Texture2D texture)
 			Rendering::SOURCE_SIZE,
 		},
 		{
-			x_pos, window_height - BASE_HEIGHT,
+			xPos, window_height - BASE_HEIGHT,
 			Rendering::TEXTURE_SIZE,
 			Rendering::TEXTURE_SIZE,
 		}, { Rendering::TEXTURE_OFFSET , Rendering::TEXTURE_OFFSET },

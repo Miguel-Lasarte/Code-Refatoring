@@ -32,24 +32,24 @@ struct PlayerData
 	int score;
 };
 
-struct Player
-{
-public:
-
-	float x_pos = 0;
-	int lives = GameConstants::Player::INITIAL_LIVES;
+class Player {
+private:
+	float xPos = 0.f;
+	float timer = 0.f;
+	size_t activeTexture = 0;
 	int direction = 0;
-	int activeTexture = 0;
-	float timer = 0;
-
-	EntityType type = EntityType::PLAYER;
-
-	void Initialize();
-	void Render(Texture2D texture);
+public:
+	int  lives = GameConstants::Player::INITIAL_LIVES;
+	Player() = default;
+	explicit Player(float screenWidth);
 	void Update();
-	
+	void Render(Texture2D resources);
+	[[nodiscard]] float GetXPos() const noexcept { return xPos; }
+	[[nodiscard]] Vector2 GetPosition() const noexcept {
+		return { xPos,static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT};
+	}
+	[[nodiscard]] size_t GetActiveTextureIndex() const noexcept { return activeTexture; }
 };
-
 
 struct Projectile
 {
