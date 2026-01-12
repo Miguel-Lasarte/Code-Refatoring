@@ -83,55 +83,6 @@ void Game::Update()
 		break;
 	case State::GAMEPLAY:
 		UpdateGameplay();
-		//CHECK ALL COLLISONS HERE
-		//TODO : Breaking law of Demeter
-		//TODO: Extract function
-		for (int i = 0; i < Projectiles.size(); i++)
-		{
-			if (Projectiles[i].GetType() == EntityType::PLAYER_PROJECTILE)
-			{
-				for (int a = 0; a < Aliens.size(); a++)
-				{
-					if (CollisionSystem::CheckCollision(Aliens[a].GetPosition(), GameConstants::Alien::RADIUS, Projectiles[i].GetLineStart(), Projectiles[i].GetLineEnd()))
-					{
-						// Kill!
-						std::cout << "Hit! \n";
-						// Set them as inactive, will be killed later
-						Projectiles[i].SetInactive();
-						Aliens[a].SetInactive();
-						score += GameConstants::Scoring::POINTS_PER_ALIEN;
-					}
-				}
-			}
-
-			//ENEMY PROJECTILES HERE
-			//TODO: Extract function
-			for (int j = 0; j < Projectiles.size(); j++)
-			{
-				if (Projectiles[j].GetType() == EntityType::ALIEN_PROJECTILE)
-				{
-					if (CollisionSystem::CheckCollision({ player.GetXPos(), GetScreenHeight() - GameConstants::Player::BASE_HEIGHT }, GameConstants::Player::BASE_HEIGHT, Projectiles[j].GetLineStart(), Projectiles[j].GetLineEnd()))
-					{
-						std::cout << "dead!\n";
-						Projectiles[j].SetInactive();
-						player.lives -= 1;
-					}
-				}
-			}
-
-
-			for (int b = 0; b < Walls.size(); b++)
-			{
-				if (CollisionSystem::CheckCollision(Walls[b].GetPosition(), GameConstants::Wall::RADIUS, Projectiles[i].GetLineStart(), Projectiles[i].GetLineEnd()))
-				{
-					// Kill!
-					std::cout << "Hit! \n";
-					// Set them as inactive, will be killed later
-					Projectiles[i].SetInactive();
-					Walls[b].takeDamage();
-				}
-			}
-		}
 
 		break;
 	case State::ENDSCREEN:
@@ -154,6 +105,7 @@ void Game::UpdateGameplay()
 		End();
 		return;
 	}
+	CheckGameCollisions();
 	UpdateEntities();
 	AlienShooting();
 	HandlePlayerInput();
@@ -347,6 +299,66 @@ void Game::SpawnNewWave() {
 		SpawnAliens();
 	}
 
+}
+
+void Game::CheckGameCollisions()
+{
+	CheckPlayerProjectileCollisions();
+	CheckAlienProjectileCollisions();
+	CheckWallCollisions();
+}
+
+void Game::CheckPlayerProjectileCollisions()
+{
+	for (auto& projectile : projectiles)
+	{
+		if (projectile.GetType() != EntityType::PLAYER_PROJECTILE || !projectile.IsActive()) continue;
+		for (auto& alien : aliens) {
+			if (!alien.IsActive()) continue;
+
+			if(CollisionSystem::CheckCollision(alien.GetPosition(), GameConstants::Alien::RADIUS, projectile.GetLineStart(), projectile.GetLineEnd()))
+			{
+				// Handle collision
+				projectile.SetInactive();
+				alien.SetInactive();
+				score += GameConstants::Scoring::POINTS_PER_ALIEN;
+				break;
+			}
+		}
+		
+	}
+}
+
+void Game::CheckAlienProjectileCollisions()
+{
+	const Vector2 playerPosition = { player.GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
+
+	for(auto& projectile : projectiles)
+	{
+		if (projectile.GetType() != EntityType::ALIEN_PROJECTILE || !projectile.IsActive()) continue;
+		if (CollisionSystem::CheckCollision(playerPosition, GameConstants::Player::BASE_HEIGHT, projectile.GetLineStart(), projectile.GetLineEnd()))
+		{
+			projectile.SetInactive();
+			player.lives -= 1;
+		}
+	}
+}
+
+void Game::CheckWallCollisions() {
+	for (auto& projectile : projectiles)
+	{
+		if (!projectile.IsActive()) continue;
+		for (auto& wall : walls)
+		{
+			if (!wall.IsActive()) continue;
+			if (CollisionSystem::CheckCollision(wall.GetPosition(), GameConstants::Wall::RADIUS, projectile.GetLineStart(), projectile.GetLineEnd()))
+			{
+				projectile.SetInactive();
+				wall.takeDamage();
+				break;
+			}
+		}
+	}
 }
 //TODO : Too long function, break into smaller functions
 void Game::Render()

@@ -151,6 +151,10 @@ private:
 	void SpawnWalls();
 	void SpawnNewWave();
 
+	void CheckGameCollisions();
+	void CheckPlayerProjectileCollisions();
+	void CheckAlienProjectileCollisions();
+	void CheckWallCollisions();
 public:
 	// Gamestate
 	State gameState = {};
