@@ -22,19 +22,19 @@ namespace {
 	}
 }
 
-Game::Game() : resources(), background()
+Game::Game() : resources(), background(), gameState(State::STARTSCREEN), score(0) 
 {
+	player.emplace(static_cast<float>(GetScreenWidth()));
 	try {
 		LoadLeaderboard();
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Error loading leaderboard: " << e.what() << std::endl;
 	}
-	gameState = State::STARTSCREEN;
-	score = 0;
 	name.clear();
-
 }
+
+
 
 Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 }
@@ -67,7 +67,9 @@ Alien::Alien(float x, float y) : position({ x, y }) {
 
 void Game::Start()
 {
-	player = Player(static_cast<float>(GetScreenWidth()));
+	
+	if(player)
+		player.emplace(static_cast<float>(GetScreenWidth()));
 	score = 0;
 	SpawnAliens();
 	SpawnWalls();
@@ -190,13 +192,13 @@ void Game::HandlePlayerInput()
 	if (IsKeyPressed(KEY_SPACE))
 	{
 		const Vector2 startPos = {
-			player.GetXPos(),
+			player->GetXPos(),
 			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
 		};
 		projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
 
 	}
-	player.Update();
+	player->Update();
 }
 
 void Game::UpdateEntities() {
@@ -211,7 +213,7 @@ void Game::UpdateEntities() {
 }
 
 void Game::UpdateBackground() {
-	Vector2 playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
+	Vector2 playerPos = { player->GetXPos(), GameConstants::Player::BASE_HEIGHT };
 	Vector2 cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
 	float offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
 	background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
@@ -219,7 +221,7 @@ void Game::UpdateBackground() {
 
 void Game::LoseConditions()
 {
-	if (player.lives < 1)
+	if (player->lives < 1)
 	{
 		End();
 	}
@@ -352,7 +354,7 @@ void Game::CheckPlayerProjectileCollisions()
 
 void Game::CheckAlienProjectileCollisions()
 {
-	const Vector2 playerPosition = { player.GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
+	const Vector2 playerPosition = { player->GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
 
 	for (auto& projectile : projectiles)
 	{
@@ -360,7 +362,7 @@ void Game::CheckAlienProjectileCollisions()
 		if (CollisionSystem::CheckCollision(playerPosition, GameConstants::Player::BASE_HEIGHT, projectile.GetLineStart(), projectile.GetLineEnd()))
 		{
 			projectile.SetInactive();
-			player.lives -= 1;
+			player->lives -= 1;
 		}
 	}
 }
@@ -418,10 +420,10 @@ void Game::RenderGameplay() const {
 	background.Render();
 
 	DrawText(TextFormat("Score: %i", score), SCORE_X, SCORE_Y, TEXT_SIZE, YELLOW);
-	DrawText(TextFormat("Lives: %i", player.lives), LIVES_X, LIVES_Y, TEXT_SIZE, YELLOW);
+	DrawText(TextFormat("Lives: %i", player->lives), LIVES_X, LIVES_Y, TEXT_SIZE, YELLOW);
 
 
-	player.Render(resources);
+	player->Render(resources);
 
 
 	for (const auto& projectile : projectiles)

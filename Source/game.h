@@ -5,6 +5,7 @@
 #include <string>
 #include "Constants.h"
 #include "CollisionSystem.h"
+#include <optional>
 
 
 enum struct State
@@ -37,7 +38,6 @@ private:
 public:
 	int  lives = GameConstants::Player::INITIAL_LIVES;
 
-	Player() = default;
 	explicit Player(float screenWidth);
 	void Update();
 	void Render (const Resources& resources)const;
@@ -192,7 +192,7 @@ private:
 	void LoadLeaderboard();
 	void SaveLeaderboard();
 
-	Player player;
+	std::optional<Player> player;
 
 	std::vector<Projectile> projectiles;
 
@@ -211,6 +211,7 @@ private:
 
 public:
 	Game();
+	void Initialize();
 	void Update();
 	void Render() const;
 
