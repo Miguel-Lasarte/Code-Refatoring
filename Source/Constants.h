@@ -109,7 +109,6 @@ namespace GameConstants
 
 	namespace UI {
 		constexpr int MAX_NAME_LENGTH = 8;
-		constexpr int MAX_NAME_CHARS = MAX_NAME_LENGTH + 1;
 		constexpr int LEADERBOARD_SIZE = 4;
 		constexpr int TEXT_BLINK_INTERVAL = 20;
 

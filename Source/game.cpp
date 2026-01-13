@@ -9,6 +9,19 @@
 #pragma warning(disable : 26446)
 
 //TODO : No const correctness
+namespace {
+	constexpr bool IsValidInputChar(int key) {
+		return key >= 32 && key <= 125;
+	}
+
+	bool CanAddCharacter(const std::string& str, size_t maxLength) {
+		return str.size() < maxLength;
+	}
+
+	bool IsAtMaxCapacity(const std::string& str, size_t maxLength) {
+		return str.size() >= maxLength;
+	}
+}
 
 Game::Game() : resources(), background()
 {
@@ -120,71 +133,56 @@ void Game::UpdateEndScreen()
 	{
 		Continue();
 	}
+	EntryName();
+}
 
-
-
+void Game::EntryName() {
 	if (newHighScore)
 	{
 		using namespace GameConstants::UI::EndScreen::NameEntry;
-		if (CheckCollisionPointRec(GetMousePosition(), { TEXTBOX_X,TEXTBOX_Y,TEXTBOX_WIDTH,TEXTBOX_HEIGHT })) mouseOnText = true;
-		else mouseOnText = false;
+
+		// Check mouse collision
+		const Rectangle textBox = { TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT };
+		const Vector2 mousePos = GetMousePosition();
+		mouseOnText = CheckCollisionPointRec(mousePos, textBox);
 
 		if (mouseOnText)
 		{
-			// Set the window's cursor to the I-Beam
 			SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
-			// Get char pressed on the queue
+			// Process all pressed characters using string operations
 			int key = GetCharPressed();
-
-			// Check if more characters have been pressed on the same frame
 			while (key > 0)
 			{
-				// NOTE: Only allow keys in range [32..125]
-				if ((key >= 32) && (key <= 125) && (letterCount < GameConstants::UI::MAX_NAME_CHARS))
+				if (IsValidInputChar(key) && CanAddCharacter(name, GameConstants::UI::MAX_NAME_LENGTH))
 				{
-					//TODO : Remove c-style string manipulation with char array
-					name[letterCount] = (char)key;
-					name[letterCount + 1] = '\0'; // Add null terminator at the end of the string.
-					letterCount++;
+					name.push_back(static_cast<char>(key));
 				}
-
-				key = GetCharPressed();  // Check next character in the queue
+				key = GetCharPressed();
 			}
 
-			//Remove chars 
-			if (IsKeyPressed(KEY_BACKSPACE))
+			// Handle backspace
+			if (IsKeyPressed(KEY_BACKSPACE) && !name.empty())
 			{
-				letterCount--;
-				if (letterCount < 0) letterCount = 0;
-				name[letterCount] = '\0';
+				name.pop_back();
 			}
-		}
-		else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-
-		if (mouseOnText)
-		{
-			framesCounter++;
 		}
 		else
 		{
-			framesCounter = 0;
+			SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 		}
 
-		if (letterCount > 0 && letterCount < GameConstants::UI::MAX_NAME_CHARS && IsKeyReleased(KEY_ENTER))
+		// Update blink animation counter
+		framesCounter = mouseOnText ? framesCounter + 1 : 0;
+
+		// Submit name on Enter key
+		if (!name.empty() && IsKeyReleased(KEY_ENTER))
 		{
-			std::string nameEntry(name);
-
-			InsertNewHighScore(nameEntry);
-
+			InsertNewHighScore(name);
 			newHighScore = false;
+			name.clear();
 		}
-
-
 	}
-
-
-
 }
 
 void Game::HandlePlayerInput()
@@ -456,50 +454,73 @@ void Game::RenderEnd() const {
 	}
 }
 
-void Game::RenderEntryName() const {
-	using namespace GameConstants::UI;
-	DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y, EndScreen::HIGHSCORE_SIZE, YELLOW);
-
-
+void Game::DrawTextbox() const {
 	using namespace GameConstants::UI::EndScreen::NameEntry;
-	DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
 
 	DrawRectangle(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, LIGHTGRAY);
-	if (mouseOnText)
+	const Color borderColor = mouseOnText ? RED : DARKGRAY;
+	DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, borderColor);
+}
+
+void Game::DrawNameText() const {
+	using namespace GameConstants::UI::EndScreen::NameEntry;
+
+	const int textX = TEXTBOX_X + TEXT_X_OFFSET;
+	const int textY = TEXTBOX_Y + TEXT_Y_OFFSET;
+	DrawText(name.c_str(), textX, textY, TEXT_SIZE, MAROON);
+}
+
+void Game::DrawCharacterCount() const {
+	using namespace GameConstants::UI::EndScreen::NameEntry;
+
+	const size_t currentLength = name.size();
+	const std::string countText = "INPUT CHARS: " + std::to_string(currentLength) +
+		"/" + std::to_string(GameConstants::UI::MAX_NAME_LENGTH);
+	DrawText(countText.c_str(), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
+}
+
+void Game::DrawCursorAndHints() const {
+	using namespace GameConstants::UI::EndScreen::NameEntry;
+
+	if (!mouseOnText) return;
+
+	const bool atMaxCapacity = IsAtMaxCapacity(name, GameConstants::UI::MAX_NAME_LENGTH);
+	const bool shouldShowCursor = (framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2 == 0;
+
+	if (!atMaxCapacity && shouldShowCursor)
 	{
-		DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, RED);
+		const int textX = TEXTBOX_X + TEXT_X_OFFSET;
+		const int textY = TEXTBOX_Y + TEXT_Y_OFFSET;
+		const int cursorX = textX + MeasureText(name.c_str(), TEXT_SIZE);
+		DrawText("_", cursorX, textY, TEXT_SIZE, MAROON);
 	}
-	else
+}
+
+void Game::DrawContinuePrompt() const {
+	using namespace GameConstants::UI;
+	using namespace GameConstants::UI::EndScreen::NameEntry;
+
+	const bool canContinue = !name.empty() && !IsAtMaxCapacity(name, MAX_NAME_LENGTH);
+	if (canContinue)
 	{
-		DrawRectangleLines(TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT, DARKGRAY);
+		DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y,
+			EndScreen::CONTINUE_SIZE, YELLOW);
 	}
+}
 
-	DrawText(name, TEXTBOX_X + TEXT_X_OFFSET, TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
+void Game::RenderEntryName() const {
+	using namespace GameConstants::UI;
+	using namespace GameConstants::UI::EndScreen::NameEntry;
 
-	DrawText(TextFormat("INPUT CHARS: %i/%i", letterCount, MAX_NAME_LENGTH), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
+	DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y,
+		EndScreen::HIGHSCORE_SIZE, YELLOW);
+	DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
 
-	if (mouseOnText)
-	{
-		if (letterCount < MAX_NAME_CHARS)
-		{
-			if (((framesCounter / GameConstants::UI::TEXT_BLINK_INTERVAL) % 2) == 0)
-			{
-				DrawText("_", TEXTBOX_X + TEXT_X_OFFSET + MeasureText(name, TEXT_SIZE), TEXTBOX_Y + TEXT_Y_OFFSET, TEXT_SIZE, MAROON);
-			}
-
-		}
-		else
-		{
-			DrawText("Press BACKSPACE to delete chars...", TEXTBOX_X, BACKSPACE_PROMPT_Y, PROMPT_SIZE, YELLOW);
-		}
-
-	}
-
-	if (letterCount > 0 && letterCount < MAX_NAME_CHARS)
-	{
-		DrawText("PRESS ENTER TO CONTINUE", TEXTBOX_X, CONTINUE_PROMT_Y, EndScreen::CONTINUE_SIZE, YELLOW);
-	}
-
+	DrawTextbox();
+	DrawNameText();
+	DrawCharacterCount();
+	DrawCursorAndHints();
+	DrawContinuePrompt();
 }
 
 void Game::RenderLeaderboard() const {

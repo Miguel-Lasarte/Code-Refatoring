@@ -150,6 +150,7 @@ private:
 	void AlienShooting();
 	void SpawnWalls();
 	void SpawnNewWave();
+	void EntryName();
 
 	void CheckGameCollisions();
 	void CheckPlayerProjectileCollisions();
@@ -159,6 +160,11 @@ private:
 	void RenderStart() const;
 	void RenderGameplay() const;
 	void RenderEnd() const;
+	void DrawTextbox() const;
+	void DrawNameText() const;
+	void DrawCharacterCount() const;
+	void DrawCursorAndHints() const;
+	void DrawContinuePrompt() const;
 	void RenderEntryName() const;
 	void RenderLeaderboard() const;
 public:
@@ -173,9 +179,6 @@ public:
 
 	//Aliens shooting
 	float shootTimer = 0;
-
-	//Aliens stuff? (idk cause liv wrote this)
-	Rectangle rec = { 0, 0 ,0 ,0 };
 
 	bool newHighScore = false;
 
@@ -220,8 +223,7 @@ public:
 
 
 	//TEXTBOX ENTER
-	char name[9 + 1] = "\0";      //One extra space required for null terminator char '\0'
-	int letterCount = 0;
+	std::string name = "";
 	bool mouseOnText = false;
 
 	int framesCounter = 0;
