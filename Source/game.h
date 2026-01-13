@@ -205,11 +205,6 @@ private:
 
 	Background background;
 
-	Vector2 playerPos;
-	Vector2 alienPos;
-	Vector2 cornerPos;
-	float offset;
-
 	std::string name = "";
 	bool mouseOnText = false;
 

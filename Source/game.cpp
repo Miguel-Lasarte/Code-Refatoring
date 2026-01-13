@@ -211,9 +211,9 @@ void Game::UpdateEntities() {
 }
 
 void Game::UpdateBackground() {
-	playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
-	cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
-	offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
+	Vector2 playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
+	Vector2 cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
+	float offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
 	background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
 }
 
