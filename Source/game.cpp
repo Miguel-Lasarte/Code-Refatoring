@@ -528,11 +528,11 @@ void Game::RenderLeaderboard() const {
 
 	DrawText("LEADERBOARD", Leaderboard::TITLE_X, Leaderboard::TITLE_Y, HUD::TEXT_SIZE, YELLOW);
 
-	for (int i = 0; i < Leaderboard.size(); i++)
+	for (int i = 0; i < leaderboard.size(); i++)
 	{
-		const char* tempNameDisplay = Leaderboard[i].name.data();
+		const char* tempNameDisplay = leaderboard[i].name.data();
 		DrawText(tempNameDisplay, Leaderboard::NAME_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-		DrawText(TextFormat("%i", Leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
+		DrawText(TextFormat("%i", leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
 	}
 }
 
@@ -547,14 +547,14 @@ void Game::InsertNewHighScore(const std::string& playerName)
 {
 	PlayerData newEntry = { playerName, score };
 	auto it = std::find_if(
-		Leaderboard.begin(), Leaderboard.end(),
+		leaderboard.begin(), leaderboard.end(),
 		[&newEntry](const PlayerData& entry) { return newEntry.score > entry.score; });
 
-	Leaderboard.insert(it, newEntry);
+	leaderboard.insert(it, newEntry);
 
-	if (Leaderboard.size() > GameConstants::UI::LEADERBOARD_SIZE)
+	if (leaderboard.size() > GameConstants::UI::LEADERBOARD_SIZE)
 	{
-		Leaderboard.resize(GameConstants::UI::LEADERBOARD_SIZE);
+		leaderboard.resize(GameConstants::UI::LEADERBOARD_SIZE);
 	}
 }
 
@@ -563,18 +563,18 @@ void Game::LoadLeaderboard()
 	std::ifstream file(GameConstants::Files::LEADERBOARD_PATH);
 	if (!file.is_open()) return;
 
-	Leaderboard.clear();
+	leaderboard.clear();
 	std::string playerName;
 	int playerScore;
 
 	while (file >> playerName >> playerScore)
 	{
-		Leaderboard.push_back({ playerName, playerScore });
+		leaderboard.push_back({ playerName, playerScore });
 	}
 
-	while (Leaderboard.size() < GameConstants::UI::LEADERBOARD_SIZE)
+	while (leaderboard.size() < GameConstants::UI::LEADERBOARD_SIZE)
 	{
-		Leaderboard.push_back({ "Player", 0 });
+		leaderboard.push_back({ "Player", 0 });
 	}
 }
 
@@ -584,7 +584,7 @@ void Game::SaveLeaderboard()
 	if (!file.is_open()) {
 		throw std::runtime_error("Failed to save Leaderboard.");
 	}
-	for (const auto& entry : Leaderboard)
+	for (const auto& entry : leaderboard)
 	{
 		file << entry.name << " " << entry.score << "\n";
 	}
