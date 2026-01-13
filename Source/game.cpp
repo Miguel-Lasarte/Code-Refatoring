@@ -25,8 +25,16 @@ namespace {
 
 Game::Game() : resources(), background()
 {
+	try {
+		LoadLeaderboard();
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error loading leaderboard: " << e.what() << std::endl;
+	}
 	gameState = State::STARTSCREEN;
 	score = 0;
+	name.clear();
+
 }
 
 Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
@@ -534,78 +542,56 @@ void Game::RenderLeaderboard() const {
 
 bool Game::CheckNewHighScore()
 {
-	//TODO : Hardcoded leaderboard size
-	//TODO : Should return false is leaderboard is empty
-	if (score > Leaderboard[GameConstants::UI::LEADERBOARD_SIZE].score)
-	{
-		return true;
-	}
-
-	return false;
+	if (Leaderboard.empty()) return true;
+	if (Leaderboard.size() < GameConstants::UI::LEADERBOARD_SIZE) return true;
+	return score > Leaderboard.back().score;
 }
 
-void Game::InsertNewHighScore(std::string playerName)
+void Game::InsertNewHighScore(std::string& playerName)
 {
-	PlayerData newData;
-	newData.name = playerName;
-	newData.score = score;
+	PlayerData newEntry = { playerName, score };
+	auto it = std::find_if(
+		Leaderboard.begin(), Leaderboard.end(),
+		[&newEntry](const PlayerData& entry) { return newEntry.score > entry.score; });
 
-	//TODO : use a algorithm for the manual loop
-	for (size_t i = 0; i < Leaderboard.size(); i++)
+	Leaderboard.insert(it, newEntry);
+
+	if (Leaderboard.size() > GameConstants::UI::LEADERBOARD_SIZE)
 	{
-		if (newData.score > Leaderboard[i].score)
-		{
-
-			Leaderboard.insert(Leaderboard.begin() + i, newData);
-
-			Leaderboard.pop_back();
-
-			i = Leaderboard.size();
-
-		}
+		Leaderboard.resize(GameConstants::UI::LEADERBOARD_SIZE);
 	}
 }
-\
-//TODO : Incomplete code
+
 void Game::LoadLeaderboard()
 {
-	// CLEAR LEADERBOARD
+	std::ifstream file(GameConstants::Files::LEADERBOARD_PATH);
+	if (!file.is_open()) return;
 
-	// OPEN FILE
+	Leaderboard.clear();
+	std::string playerName;
+	int playerScore;
 
-	// READ DATA
+	while (file >> playerName >> playerScore)
+	{
+		Leaderboard.push_back({ playerName, playerScore });
+	}
 
-	// WRITE DATA ONTO LEADERBOARD
-
-	//CLOSE FILE
+	while (Leaderboard.size() < GameConstants::UI::LEADERBOARD_SIZE)
+	{
+		Leaderboard.push_back({ "Player", 0 });
+	}
 }
 
-//TODO : Incomplete code
-//TODO : Add error handling for file operations
 void Game::SaveLeaderboard()
 {
-	// SAVE LEADERBOARD AS ARRAY
-
-	// OPEN FILE
-	std::fstream file;
-
-	//TODO : Open but unused
-	file.open("Leaderboard");
-
-	if (!file)
-	{
-		std::cout << "file not found \n";
-
+	std::ofstream file(GameConstants::Files::LEADERBOARD_PATH, std::ios::trunc);
+	if (!file.is_open()) {
+		throw std::runtime_error("Failed to save Leaderboard.");
 	}
-	else
+	for (const auto& entry : Leaderboard)
 	{
-		std::cout << "file found \n";
+		file << entry.name << " " << entry.score << "\n";
 	}
-	// CLEAR FILE
-
-	// WRITE ARRAY DATA INTO FILE
-
-	// CLOSE FILE
 }
 
 void Player::Update()

@@ -188,7 +188,7 @@ private:
 
 	bool CheckNewHighScore();
 
-	void InsertNewHighScore(std::string name);
+	void InsertNewHighScore(std::string& playerName);
 
 	void LoadLeaderboard();
 	void SaveLeaderboard();
