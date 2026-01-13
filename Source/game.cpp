@@ -4,9 +4,10 @@
 #include <chrono>
 #include <thread>
 #include <fstream>
+#include <algorithm>
 #pragma warning (push)
 #pragma warning(disable : 26446)
-//TODO : Alot of magic numbers
+
 //TODO : No const correctness
 
 Game::Game() : resources(), background()
@@ -236,30 +237,31 @@ void Game::LoseConditions()
 }
 
 void Game::RemoveInactiveEntities() {
-	for (int i = 0; i < projectiles.size(); i++)
-	{
-		if (!projectiles[i].IsActive())
-		{
-			projectiles.erase(projectiles.begin() + i);
-			i--;
-		}
-	}
-	for (int i = 0; i < aliens.size(); i++)
-	{
-		if (!aliens[i].IsActive())
-		{
-			aliens.erase(aliens.begin() + i);
-			i--;
-		}
-	}
-	for (int i = 0; i < walls.size(); i++)
-	{
-		if (!walls[i].IsActive())
-		{
-			walls.erase(walls.begin() + i);
-			i--;
-		}
-	}
+	projectiles.erase(
+		std::remove_if(
+			projectiles.begin(),
+			projectiles.end(),
+			[](const Projectile& proj) { return !proj.IsActive(); }
+		),
+		projectiles.end()
+	);
+
+	aliens.erase(
+		std::remove_if(
+			aliens.begin(),
+			aliens.end(),
+			[](const Alien& alien) { return !alien.IsActive(); }
+		),
+		aliens.end()
+	);
+	walls.erase(
+		std::remove_if(
+			walls.begin(),
+			walls.end(),
+			[](const Wall& wall) { return !wall.IsActive(); }
+		),
+		walls.end()
+	);
 
 }
 
