@@ -8,7 +8,6 @@
 #pragma warning (push)
 #pragma warning(disable : 26446)
 
-//TODO : No const correctness
 namespace {
 	constexpr bool IsValidInputChar(int key) {
 		return key >= 32 && key <= 125;
@@ -76,10 +75,8 @@ void Game::Start()
 
 }
 
-//TODO : Add error handling
 void Game::End()
 {
-	//SAVE SCORE AND UPDATE SCOREBOARD
 	projectiles.clear();
 	walls.clear();
 	aliens.clear();
@@ -268,7 +265,7 @@ void Game::RemoveInactiveEntities() {
 
 void Game::AlienShooting() {
 	shootTimer += 1;
-	if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES) //once per second
+	if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES) 
 	{
 		int randomAlienIndex = 0;
 
@@ -342,7 +339,6 @@ void Game::CheckPlayerProjectileCollisions()
 
 			if (CollisionSystem::CheckCollision(alien.GetPosition(), GameConstants::Alien::RADIUS, projectile.GetLineStart(), projectile.GetLineEnd()))
 			{
-				// Handle collision
 				projectile.SetInactive();
 				alien.SetInactive();
 				score += GameConstants::Scoring::POINTS_PER_ALIEN;
@@ -540,14 +536,14 @@ void Game::RenderLeaderboard() const {
 	}
 }
 
-bool Game::CheckNewHighScore()
+bool Game::CheckNewHighScore() const noexcept
 {
-	if (Leaderboard.empty()) return true;
-	if (Leaderboard.size() < GameConstants::UI::LEADERBOARD_SIZE) return true;
-	return score > Leaderboard.back().score;
+	if (leaderboard.empty()) return true;
+	if (leaderboard.size() < GameConstants::UI::LEADERBOARD_SIZE) return true;
+	return score > leaderboard.back().score;
 }
 
-void Game::InsertNewHighScore(std::string& playerName)
+void Game::InsertNewHighScore(const std::string& playerName) 
 {
 	PlayerData newEntry = { playerName, score };
 	auto it = std::find_if(

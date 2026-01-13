@@ -186,9 +186,9 @@ private:
 
 	void SpawnAliens();
 
-	bool CheckNewHighScore();
+	bool CheckNewHighScore() const noexcept;
 
-	void InsertNewHighScore(std::string& playerName);
+	void InsertNewHighScore(const std::string& playerName);
 
 	void LoadLeaderboard();
 	void SaveLeaderboard();
