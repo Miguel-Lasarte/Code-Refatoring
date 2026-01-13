@@ -37,6 +37,7 @@ private:
 	int direction = 0;
 public:
 	int  lives = GameConstants::Player::INITIAL_LIVES;
+
 	Player() = default;
 	explicit Player(float screenWidth);
 	void Update();
@@ -139,6 +140,11 @@ struct Game
 private:
 	Resources resources;
 
+	void Start();
+	void End();
+
+	void Continue();
+
 	void UpdateStartScreen();
 	void UpdateGameplay();
 	void UpdateEndScreen();
@@ -167,30 +173,16 @@ private:
 	void DrawContinuePrompt() const;
 	void RenderEntryName() const;
 	void RenderLeaderboard() const;
-public:
-	// Gamestate
+
 	State gameState = {};
 
-	// Score
 	int score;
 
-	// for later, make a file where you can adjust the number of walls (config file) 
 	int wallCount = 5;
 
-	//Aliens shooting
 	float shootTimer = 0;
 
 	bool newHighScore = false;
-
-	Game();
-	void Start();
-	void End();
-
-	void Continue();
-
-
-	void Update();
-	void Render() const;
 
 	void SpawnAliens();
 
@@ -213,19 +205,20 @@ public:
 
 	Background background;
 
-
-
 	Vector2 playerPos;
 	Vector2 alienPos;
 	Vector2 cornerPos;
 	float offset;
 
-
-
-	//TEXTBOX ENTER
 	std::string name = "";
 	bool mouseOnText = false;
 
 	int framesCounter = 0;
 
+public:
+	Game();
+	void Update();
+	void Render() const;
+
+	
 };

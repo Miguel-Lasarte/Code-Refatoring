@@ -141,7 +141,6 @@ void Game::EntryName() {
 	{
 		using namespace GameConstants::UI::EndScreen::NameEntry;
 
-		// Check mouse collision
 		const Rectangle textBox = { TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT };
 		const Vector2 mousePos = GetMousePosition();
 		mouseOnText = CheckCollisionPointRec(mousePos, textBox);
@@ -150,7 +149,6 @@ void Game::EntryName() {
 		{
 			SetMouseCursor(MOUSE_CURSOR_IBEAM);
 
-			// Process all pressed characters using string operations
 			int key = GetCharPressed();
 			while (key > 0)
 			{
@@ -161,7 +159,6 @@ void Game::EntryName() {
 				key = GetCharPressed();
 			}
 
-			// Handle backspace
 			if (IsKeyPressed(KEY_BACKSPACE) && !name.empty())
 			{
 				name.pop_back();
@@ -172,10 +169,8 @@ void Game::EntryName() {
 			SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 		}
 
-		// Update blink animation counter
 		framesCounter = mouseOnText ? framesCounter + 1 : 0;
 
-		// Submit name on Enter key
 		if (!name.empty() && IsKeyReleased(KEY_ENTER))
 		{
 			InsertNewHighScore(name);
