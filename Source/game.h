@@ -6,7 +6,6 @@
 #include "Constants.h"
 #include "CollisionSystem.h"
 
-//TODO : Inconsistent naming conventions
 
 enum struct State
 {

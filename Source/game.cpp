@@ -200,13 +200,13 @@ void Game::HandlePlayerInput()
 }
 
 void Game::UpdateEntities() {
-	for (int i = 0; i < projectiles.size(); i++)
+	for (auto& projectile : projectiles)
 	{
-		projectiles[i].Update();
+		projectile.Update();
 	}
-	for (int i = 0; i < walls.size(); i++)
+	for (auto& wall : walls)
 	{
-		walls[i].Update();
+		wall.Update();
 	}
 }
 
@@ -223,13 +223,14 @@ void Game::LoseConditions()
 	{
 		End();
 	}
-	for (int i = 0; i < aliens.size(); i++)
+	for (auto& alien : aliens)
 	{
-		aliens[i].Update();
+		alien. Update();
 
-		if (aliens[i].GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
+		if (alien.GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
 		{
 			End();
+			return;
 		}
 	}
 }
