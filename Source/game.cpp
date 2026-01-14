@@ -552,14 +552,21 @@ void Game::LoadLeaderboard()
 
 void Game::SaveLeaderboard()
 {
-	std::ofstream file(GameConstants::Files::LEADERBOARD_PATH, std::ios::trunc);
-	if (!file.is_open()) {
-		throw std::runtime_error("Failed to save Leaderboard.");
+	try {
+		std::ofstream file(GameConstants::Files::LEADERBOARD_PATH, std::ios::trunc);
+		if (!file.is_open()) {
+			throw std::runtime_error("Failed to save Leaderboard.");
+		}
+		for (const auto& entry : leaderboard)
+		{
+			file << entry.name << " " << entry.score << "\n";
+		}
 	}
-	for (const auto& entry : leaderboard)
-	{
-		file << entry.name << " " << entry.score << "\n";
+	catch (const std::exception& e) {
+		std::cerr << "Error saving leaderboard: " << e.what() << std::endl;
+		TraceLog(LOG_ERROR, "Error saving leaderboard: %s", e.what());
 	}
+	
 }
 
 #pragma warning (pop)
