@@ -84,7 +84,7 @@ void Wall::Update()
 
 }
 
-void Wall::takeDamage() noexcept
+void Wall::TakeDamage() noexcept
 {
 	health--;
 }

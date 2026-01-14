@@ -1,4 +1,5 @@
 #include "game.h"
+#include <algorithm>
 
 Star::Star(Vector2 pos, float size) : initPosition(pos), position(pos), size(size) {
 }
@@ -34,17 +35,15 @@ void Star::Render() const
 
 void Background::Update(float offset)
 {
-	for (auto& star : stars)
-	{
+	std::for_each(stars.begin(), stars.end(), [offset](auto& star) {
 		star.Update(offset);
-	}
+		});
 
 }
 
 void Background::Render() const
 {
-	for (const auto& star : stars)
-	{
+	std::for_each(stars.begin(), stars.end(), [](const auto& star) {
 		star.Render();
-	}
+		});
 }

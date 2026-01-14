@@ -89,7 +89,7 @@ public:
 	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
 	[[nodiscard]] bool IsActive() const noexcept { return active; }
 
-	void takeDamage() noexcept;
+	void TakeDamage() noexcept;
 };
 
 class Alien
