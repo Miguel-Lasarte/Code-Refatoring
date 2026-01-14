@@ -40,7 +40,7 @@ public:
 
 	explicit Player(float screenWidth);
 	void Update();
-	void Render (const Resources& resources)const;
+	void Render(const Resources& resources)const;
 	[[nodiscard]] float GetXPos() const noexcept { return xPos; }
 	[[nodiscard]] Vector2 GetPosition() const noexcept {
 		return { xPos,static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
@@ -51,7 +51,7 @@ public:
 class Projectile
 {
 private:
-	Vector2 position = { 0.f,0.f};
+	Vector2 position = { 0.f,0.f };
 	bool active = true;
 	int speed;
 	EntityType type = {};
@@ -103,7 +103,7 @@ public:
 	Alien(float x, float y);
 
 	void Update();
-	void Render (const Resources& resources) const;
+	void Render(const Resources& resources) const;
 
 	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
 	[[nodiscard]] bool IsActive() const noexcept { return active; }
@@ -134,7 +134,7 @@ public:
 
 };
 
-struct Game
+class Game
 {
 private:
 	Resources resources;
@@ -211,8 +211,15 @@ private:
 
 public:
 	Game();
+	~Game() = default;
+
+	Game(const Game&) = delete;
+	Game& operator=(const Game&) = delete;
+	Game(Game&&) noexcept = default;
+	Game& operator=(Game&&) noexcept = default;
+
 	void Update();
 	void Render() const;
 
-	
+
 };
