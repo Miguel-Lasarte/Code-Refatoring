@@ -24,29 +24,45 @@ namespace {
 
 Game::Game() : resources(), background(), gameState(State::STARTSCREEN), score(0)
 {
-	player.emplace(static_cast<float>(GetScreenWidth()));
 	try {
 		LoadLeaderboard();
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Error loading leaderboard: " << e.what() << std::endl;
+		leaderboard = {
+			{"Player 1", 500},
+			{"Player 2", 400},
+			{"Player 3", 300},
+			{"Player 4", 200},
+			{"Player 5", 100}
+		};
 	}
-	name.clear();
 }
 
-void Game::Start()
+void Game::InitializeEntities()
 {
-
-	if (player)
-		player.emplace(static_cast<float>(GetScreenWidth()));
-	score = 0;
+	player.emplace(static_cast<float>(GetScreenWidth()));
 	SpawnAliens();
 	SpawnWalls();
-	gameState = State::GAMEPLAY;
-
 }
 
-void Game::End()
+void Game::InitializeNewGame()
+{
+	score = 0;
+	shootTimer = 0;
+	projectiles.clear();
+	walls.clear();
+	aliens.clear();
+	InitializeEntities();
+}
+
+void Game::TransitionToGameplay()
+{
+	InitializeNewGame();
+	gameState = State::GAMEPLAY;
+}
+
+void Game::TransitionToEnd()
 {
 	projectiles.clear();
 	walls.clear();
@@ -55,58 +71,58 @@ void Game::End()
 	gameState = State::ENDSCREEN;
 }
 
-void Game::Continue()
+void Game::TransitionToStart()
 {
 	SaveLeaderboard();
+	name.clear();
 	gameState = State::STARTSCREEN;
 }
 
-void Game::Update()
+void Game::UpdateStart()
 {
-	switch (gameState)
-	{
-	case State::STARTSCREEN:
-
-		UpdateStartScreen();
-		break;
-	case State::GAMEPLAY:
-		UpdateGameplay();
-
-		break;
-	case State::ENDSCREEN:
-		UpdateEndScreen();
-		break;
-	default:
-		break;
-	}
+	if (IsKeyReleased(KEY_SPACE))
+		TransitionToGameplay();
 }
 
-void Game::UpdateStartScreen()
+void Game::UpdateEnd()
 {
-	if (IsKeyReleased(KEY_SPACE))Start();
+	if (IsKeyReleased(KEY_ENTER) && !newHighScore)
+		TransitionToStart();
+
+	EntryName();
 }
 
 void Game::UpdateGameplay()
 {
 	if (IsKeyReleased(KEY_Q))
 	{
-		End();
+		TransitionToEnd();
 		return;
 	}
 	ProcessGameLogic();
 	HandlePlayerInput();
 	UpdateBackground();
-
 }
-
-void Game::UpdateEndScreen()
+void Game::Update()
 {
-	if (IsKeyReleased(KEY_ENTER) && !newHighScore)
+	switch (gameState)
 	{
-		Continue();
+	case State::STARTSCREEN:
+
+		UpdateStart();
+		break;
+	case State::GAMEPLAY:
+		UpdateGameplay();
+
+		break;
+	case State::ENDSCREEN:
+		UpdateEnd();
+		break;
+	default:
+		break;
 	}
-	EntryName();
 }
+
 
 void Game::ProcessGameLogic()
 {
@@ -200,7 +216,7 @@ void Game::LoseConditions()
 {
 	if (player->lives < 1)
 	{
-		End();
+		TransitionToEnd();
 	}
 	for (auto& alien : aliens)
 	{
@@ -208,7 +224,7 @@ void Game::LoseConditions()
 
 		if (alien.GetPosition().y > GetScreenHeight() - GameConstants::Player::BASE_HEIGHT)
 		{
-			End();
+			TransitionToEnd();
 			return;
 		}
 	}

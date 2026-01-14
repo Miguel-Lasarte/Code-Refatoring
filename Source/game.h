@@ -139,14 +139,44 @@ class Game
 private:
 	Resources resources;
 
-	void Start();
-	void End();
+	State gameState = {};
 
-	void Continue();
+	int score;
 
-	void UpdateStartScreen();
+	int wallCount = 5;
+
+	float shootTimer = 0;
+
+	bool newHighScore = false;
+
+	std::optional<Player> player;
+
+	std::vector<Projectile> projectiles;
+
+	std::vector<Wall> walls;
+
+	std::vector<Alien> aliens;
+
+	std::vector<PlayerData> leaderboard = { {"Player 1", 500}, {"Player 2", 400}, {"Player 3", 300}, {"Player 4", 200}, {"Player 5", 100} };
+
+	Background background;
+
+	std::string name = "";
+	bool mouseOnText = false;
+
+	int framesCounter = 0;
+
+	void InitializeEntities();
+	void InitializeNewGame();
+	void TransitionToGameplay();
+	void TransitionToEnd();
+	void TransitionToStart();
+	void SpawnAliens();
+	void SpawnWalls();
+
+	void UpdateStart();
 	void UpdateGameplay();
-	void UpdateEndScreen();
+	void UpdateEnd();
 	void ProcessGameLogic();
 	void HandlePlayerInput();
 	void UpdateEntities();
@@ -154,7 +184,6 @@ private:
 	void LoseConditions();
 	void RemoveInactiveEntities();
 	void AlienShooting();
-	void SpawnWalls();
 	void SpawnNewWave();
 	void SpawnPlayerProjectile();
 	void EntryName();
@@ -176,41 +205,13 @@ private:
 	void RenderLeaderboard() const;
 	void DrawNameInputBox() const;
 
-	State gameState = {};
-
-	int score;
-
-	int wallCount = 5;
-
-	float shootTimer = 0;
-
-	bool newHighScore = false;
-
-	void SpawnAliens();
-
 	bool CheckNewHighScore() const noexcept;
 
 	void InsertNewHighScore(const std::string& playerName);
-
 	void LoadLeaderboard();
 	void SaveLeaderboard();
 
-	std::optional<Player> player;
-
-	std::vector<Projectile> projectiles;
-
-	std::vector<Wall> walls;
-
-	std::vector<Alien> aliens;
-
-	std::vector<PlayerData> leaderboard = { {"Player 1", 500}, {"Player 2", 400}, {"Player 3", 300}, {"Player 4", 200}, {"Player 5", 100} };
-
-	Background background;
-
-	std::string name = "";
-	bool mouseOnText = false;
-
-	int framesCounter = 0;
+	
 
 public:
 	Game();
@@ -218,8 +219,8 @@ public:
 
 	Game(const Game&) = delete;
 	Game& operator=(const Game&) = delete;
-	Game(Game&&) noexcept = default;
-	Game& operator=(Game&&) noexcept = default;
+	Game(Game&&)  = delete;
+	Game& operator=(Game&&) = delete;
 
 	void Update();
 	void Render() const;
