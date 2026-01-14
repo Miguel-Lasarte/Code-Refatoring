@@ -236,33 +236,13 @@ void Game::LoseConditions()
 }
 
 void Game::RemoveInactiveEntities() {
-	projectiles.erase(
-		std::remove_if(
-			projectiles.begin(),
-			projectiles.end(),
-			[](const Projectile& proj) { return !proj.IsActive(); }
-		),
-		projectiles.end()
-	);
 
-	aliens.erase(
-		std::remove_if(
-			aliens.begin(),
-			aliens.end(),
-			[](const Alien& alien) { return !alien.IsActive(); }
-		),
-		aliens.end()
-	);
-	walls.erase(
-		std::remove_if(
-			walls.begin(),
-			walls.end(),
-			[](const Wall& wall) { return !wall.IsActive(); }
-		),
-		walls.end()
-	);
+	auto removeInactive = [](const auto& entity) { return !entity.IsActive(); };
 
-}
+	std::erase_if(projectiles, removeInactive);
+	std::erase_if(aliens, removeInactive);
+	std::erase_if(walls, removeInactive);
+};
 
 void Game::AlienShooting() {
 	shootTimer += 1;
