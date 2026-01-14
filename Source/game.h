@@ -147,6 +147,7 @@ private:
 	void UpdateStartScreen();
 	void UpdateGameplay();
 	void UpdateEndScreen();
+	void ProcessGameLogic();
 	void HandlePlayerInput();
 	void UpdateEntities();
 	void UpdateBackground();
@@ -155,6 +156,7 @@ private:
 	void AlienShooting();
 	void SpawnWalls();
 	void SpawnNewWave();
+	void SpawnPlayerProjectile();
 	void EntryName();
 
 	void CheckGameCollisions();
@@ -168,10 +170,11 @@ private:
 	void DrawTextbox() const;
 	void DrawNameText() const;
 	void DrawCharacterCount() const;
-	void DrawCursorAndHints() const;
+	void DrawCursor() const;
 	void DrawContinuePrompt() const;
 	void RenderEntryName() const;
 	void RenderLeaderboard() const;
+	void DrawNameInputBox() const;
 
 	State gameState = {};
 

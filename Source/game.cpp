@@ -93,14 +93,10 @@ void Game::UpdateGameplay()
 		End();
 		return;
 	}
-	CheckGameCollisions();
-	UpdateEntities();
-	AlienShooting();
+	ProcessGameLogic();
 	HandlePlayerInput();
 	UpdateBackground();
-	LoseConditions();
-	RemoveInactiveEntities();
-	SpawnNewWave();
+
 }
 
 void Game::UpdateEndScreen()
@@ -110,6 +106,16 @@ void Game::UpdateEndScreen()
 		Continue();
 	}
 	EntryName();
+}
+
+void Game::ProcessGameLogic()
+{
+	CheckGameCollisions();
+	UpdateEntities();
+	AlienShooting();
+	LoseConditions();
+	RemoveInactiveEntities();
+	SpawnNewWave();
 }
 
 void Game::EntryName() {
@@ -160,14 +166,18 @@ void Game::HandlePlayerInput()
 {
 	if (IsKeyPressed(KEY_SPACE))
 	{
-		const Vector2 startPos = {
-			player->GetXPos(),
-			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
-		};
-		projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
-
+		SpawnPlayerProjectile();
 	}
 	player->Update();
+}
+
+void Game::SpawnPlayerProjectile()
+{
+	const Vector2 startPos = {
+			player->GetXPos(),
+			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
+	};
+	projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
 }
 
 void Game::UpdateEntities() {
@@ -450,7 +460,7 @@ void Game::DrawCharacterCount() const {
 	DrawText(countText.c_str(), TEXTBOX_X, COUNT_Y, PROMPT_SIZE, YELLOW);
 }
 
-void Game::DrawCursorAndHints() const {
+void Game::DrawCursor() const {
 	using namespace GameConstants::UI::EndScreen::NameEntry;
 
 	if (!mouseOnText) return;
@@ -486,12 +496,17 @@ void Game::RenderEntryName() const {
 	DrawText("NEW HIGHSCORE!", EndScreen::HIGHSCORE_X, EndScreen::HIGHSCORE_Y,
 		EndScreen::HIGHSCORE_SIZE, YELLOW);
 	DrawText("PLACE MOUSE OVER INPUT BOX!", TEXTBOX_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
+	
+	DrawNameInputBox();
+	DrawContinuePrompt();
 
+}
+
+void Game::DrawNameInputBox() const {
 	DrawTextbox();
 	DrawNameText();
 	DrawCharacterCount();
-	DrawCursorAndHints();
-	DrawContinuePrompt();
+	DrawCursor();
 }
 
 void Game::RenderLeaderboard() const {
