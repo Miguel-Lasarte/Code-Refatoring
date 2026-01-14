@@ -211,7 +211,6 @@ private:
 
 public:
 	Game();
-	void Initialize();
 	void Update();
 	void Render() const;
 
