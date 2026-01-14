@@ -135,46 +135,51 @@ void Game::ProcessGameLogic()
 }
 
 void Game::EntryName() {
-	if (newHighScore)
+
+	if (!newHighScore) return;
+
+	using namespace GameConstants::UI::EndScreen::NameEntry;
+
+	const Rectangle textBox = { TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT };
+	const Vector2 mousePos = GetMousePosition();
+	mouseOnText = CheckCollisionPointRec(mousePos, textBox);
+
+	if (mouseOnText)
 	{
-		using namespace GameConstants::UI::EndScreen::NameEntry;
+		SetMouseCursor(MOUSE_CURSOR_IBEAM);
+		HandleTextInput();
+		
+	}
+	else
+	{
+		SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+	}
 
-		const Rectangle textBox = { TEXTBOX_X, TEXTBOX_Y, TEXTBOX_WIDTH, TEXTBOX_HEIGHT };
-		const Vector2 mousePos = GetMousePosition();
-		mouseOnText = CheckCollisionPointRec(mousePos, textBox);
+	framesCounter = mouseOnText ? framesCounter + 1 : 0;
 
-		if (mouseOnText)
+	if (!name.empty() && IsKeyReleased(KEY_ENTER))
+	{
+		InsertNewHighScore(name);
+		newHighScore = false;
+		name.clear();
+	}
+
+}
+
+void Game::HandleTextInput() {
+	int key = GetCharPressed();
+	while (key > 0)
+	{
+		if (IsValidInputChar(key) && CanAddCharacter(name, GameConstants::UI::MAX_NAME_LENGTH))
 		{
-			SetMouseCursor(MOUSE_CURSOR_IBEAM);
-
-			int key = GetCharPressed();
-			while (key > 0)
-			{
-				if (IsValidInputChar(key) && CanAddCharacter(name, GameConstants::UI::MAX_NAME_LENGTH))
-				{
-					name.push_back(static_cast<char>(key));
-				}
-				key = GetCharPressed();
-			}
-
-			if (IsKeyPressed(KEY_BACKSPACE) && !name.empty())
-			{
-				name.pop_back();
-			}
+			name.push_back(static_cast<char>(key));
 		}
-		else
-		{
-			SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-		}
+		key = GetCharPressed();
+	}
 
-		framesCounter = mouseOnText ? framesCounter + 1 : 0;
-
-		if (!name.empty() && IsKeyReleased(KEY_ENTER))
-		{
-			InsertNewHighScore(name);
-			newHighScore = false;
-			name.clear();
-		}
+	if (IsKeyPressed(KEY_BACKSPACE) && !name.empty())
+	{
+		name.pop_back();
 	}
 }
 
@@ -291,7 +296,7 @@ void Game::SpawnWalls()
 void Game::SpawnAliens()
 {
 	aliens.clear();
-	aliens.reserve(GameConstants::Formation::WIDTH * GameConstants::Formation::HEIGHT);
+	aliens.reserve(static_cast<std::vector<Alien, std::allocator<Alien>>::size_type>(GameConstants::Formation::WIDTH) * GameConstants::Formation::HEIGHT);
 
 	for (int row = 0; row < GameConstants::Formation::HEIGHT; ++row) {
 		for (int col = 0; col < GameConstants::Formation::WIDTH; ++col) {
@@ -345,7 +350,7 @@ void Game::CheckPlayerProjectileCollisions()
 			alienHit->SetInactive();
 			score += GameConstants::Scoring::POINTS_PER_ALIEN;
 		}
-	});
+		});
 }
 
 void Game::CheckAlienProjectileCollisions()

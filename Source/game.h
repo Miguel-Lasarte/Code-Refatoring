@@ -186,7 +186,9 @@ private:
 	void AlienShooting();
 	void SpawnNewWave();
 	void SpawnPlayerProjectile();
+
 	void EntryName();
+	void HandleTextInput();
 
 	void CheckGameCollisions();
 	void CheckPlayerProjectileCollisions();
