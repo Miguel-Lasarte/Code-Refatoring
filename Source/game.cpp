@@ -22,29 +22,26 @@ namespace {
 	}
 }
 
-Game::Game() : resources(), background(), gameState(State::STARTSCREEN), score(0)
+Game::Game(Resources&& res)
+	: resources(std::move(res))
+	, background()
+	, gameState(State::STARTSCREEN)
+	, score(0)
+	, player(static_cast<float>(GetScreenWidth()))
 {
-	try {
-		LoadLeaderboard();
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Error loading leaderboard: " << e.what() << std::endl;
-		leaderboard = {
-			{"Player 1", 500},
-			{"Player 2", 400},
-			{"Player 3", 300},
-			{"Player 4", 200},
-			{"Player 5", 100}
-		};
-	}
+	LoadLeaderboard();
 }
 
-void Game::InitializeEntities()
-{
-	player.emplace(static_cast<float>(GetScreenWidth()));
-	SpawnAliens();
-	SpawnWalls();
+
+std::optional<Game> Game::TryCreate() {
+	auto maybeResources = Resources::TryCreate();
+	if (!maybeResources) {
+		TraceLog(LOG_ERROR, "Failed to load game resources");
+		return std::nullopt;
+	}
+	return Game(std::move(*maybeResources));
 }
+
 
 void Game::InitializeNewGame()
 {
@@ -53,7 +50,8 @@ void Game::InitializeNewGame()
 	projectiles.clear();
 	walls.clear();
 	aliens.clear();
-	InitializeEntities();
+	SpawnAliens();
+	SpawnWalls();
 }
 
 void Game::TransitionToGameplay()
@@ -189,13 +187,13 @@ void Game::HandlePlayerInput()
 	{
 		SpawnPlayerProjectile();
 	}
-	player->Update();
+	player.Update();
 }
 
 void Game::SpawnPlayerProjectile()
 {
 	const Vector2 startPos = {
-			player->GetXPos(),
+			player.GetXPos(),
 			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
 	};
 	projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
@@ -211,7 +209,7 @@ void Game::UpdateEntities() {
 }
 
 void Game::UpdateBackground() {
-	Vector2 playerPos = { player->GetXPos(), GameConstants::Player::BASE_HEIGHT };
+	Vector2 playerPos = { player.GetXPos(), GameConstants::Player::BASE_HEIGHT };
 	Vector2 cornerPos = { 0, GameConstants::Player::BASE_HEIGHT };
 	float offset = CollisionSystem::CalculateLineLength(playerPos, cornerPos) * -1;
 	background.Update(offset / GameConstants::Background::PARALLAX_SPEED);
@@ -219,7 +217,7 @@ void Game::UpdateBackground() {
 
 void Game::LoseConditions()
 {
-	if (player->lives < 1)
+	if (player.lives < 1)
 	{
 		TransitionToEnd();
 	}
@@ -335,7 +333,7 @@ void Game::CheckPlayerProjectileCollisions()
 
 void Game::CheckAlienProjectileCollisions()
 {
-	const Vector2 playerPosition = { player->GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
+	const Vector2 playerPosition = { player.GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
 
 	auto projectileHit = std::find_if(projectiles.begin(), projectiles.end(), [&](auto& proj) {
 		return proj.GetType() == EntityType::ALIEN_PROJECTILE &&
@@ -350,7 +348,7 @@ void Game::CheckAlienProjectileCollisions()
 	if (projectileHit != projectiles.end())
 	{
 		projectileHit->SetInactive();
-		player->lives -= 1;
+		player.lives -= 1;
 	}
 }
 
@@ -410,10 +408,10 @@ void Game::RenderGameplay() const {
 	background.Render();
 
 	DrawText(TextFormat("Score: %i", score), SCORE_X, SCORE_Y, TEXT_SIZE, YELLOW);
-	DrawText(TextFormat("Lives: %i", player->lives), LIVES_X, LIVES_Y, TEXT_SIZE, YELLOW);
+	DrawText(TextFormat("Lives: %i", player.lives), LIVES_X, LIVES_Y, TEXT_SIZE, YELLOW);
 
 
-	player->Render(resources);
+	player.Render(resources);
 
 
 	std::for_each(projectiles.begin(), projectiles.end(), [&](const auto& proj) {
@@ -574,18 +572,24 @@ void Game::SaveLeaderboard()
 	try {
 		std::ofstream file(GameConstants::Files::LEADERBOARD_PATH, std::ios::trunc);
 		if (!file.is_open()) {
-			throw std::runtime_error("Failed to save Leaderboard.");
+			TraceLog(LOG_ERROR, "Failed to open leaderboard file for writing");
+			return;
 		}
+
 		for (const auto& entry : leaderboard)
 		{
 			file << entry.name << " " << entry.score << "\n";
 		}
+
+		file.close();
+
+		if (!file.good()) {
+			TraceLog(LOG_ERROR, "Error occurred while writing leaderboard");
+		}
 	}
 	catch (const std::exception& e) {
-		std::cerr << "Error saving leaderboard: " << e.what() << std::endl;
 		TraceLog(LOG_ERROR, "Error saving leaderboard: %s", e.what());
 	}
-
 }
 
 #pragma warning (pop)

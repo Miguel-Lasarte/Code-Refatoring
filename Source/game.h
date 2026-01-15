@@ -149,7 +149,7 @@ private:
 
 	bool newHighScore = false;
 
-	std::optional<Player> player;
+	Player player;
 
 	std::vector<Projectile> projectiles;
 
@@ -165,8 +165,7 @@ private:
 	bool mouseOnText = false;
 
 	int framesCounter = 0;
-
-	void InitializeEntities();
+	Game(Resources&& res);
 	void InitializeNewGame();
 	void TransitionToGameplay();
 	void TransitionToEnd();
@@ -216,16 +215,15 @@ private:
 	
 
 public:
-	Game();
+	[[nodiscard]] static std::optional<Game> TryCreate();
+
 	~Game() = default;
 
 	Game(const Game&) = delete;
 	Game& operator=(const Game&) = delete;
-	Game(Game&&)  = delete;
-	Game& operator=(Game&&) = delete;
+	Game(Game&&) noexcept = default;
+	Game& operator=(Game&&) noexcept = default;
 
 	void Update();
 	void Render() const;
-
-
 };

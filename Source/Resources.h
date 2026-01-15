@@ -4,6 +4,7 @@
 #include "Constants.h"
 #include "ResourceHandle.h"
 #include <stdexcept>
+#include <optional>
 
 
 class Resources
@@ -12,10 +13,10 @@ class Resources
 	ResourceHandle<Texture2D> alienTexture;
 	ResourceHandle<Texture2D> wallTexture;
 	ResourceHandle<Texture2D> projectileTexture;
-
+	Resources() = default;
 public:
-	Resources();
-
+	
+	[[nodiscard]] static std::optional<Resources> TryCreate();
 	Resources(const Resources&) = delete;
 	Resources& operator=(const Resources&) = delete;
 	Resources(Resources&&) noexcept = default;
@@ -31,6 +32,6 @@ public:
 	[[nodiscard]] Texture2D GetProjectileTexture() const noexcept {
 		return projectileTexture.Get();
 	}
-    [[nodiscard]] Texture2D GetShipTexture(size_t index) const;
+    [[nodiscard]] Texture2D GetShipTexture(size_t index) const noexcept;
 
 };

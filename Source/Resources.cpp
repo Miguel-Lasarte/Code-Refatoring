@@ -2,30 +2,53 @@
 #pragma warning (push)
 #pragma warning(disable : 26446)
 
-Resources::Resources() {
-	alienTexture = ResourceHandle<Texture2D>("./Assets/Alien.png");
-	wallTexture = ResourceHandle<Texture2D>("./Assets/Barrier.png");
-	projectileTexture = ResourceHandle<Texture2D>("./Assets/Laser.png");
+std::optional<Resources> Resources::TryCreate() {
+	Resources res;
 
-	shipTextures.reserve(GameConstants::Player::Rendering::TEXTURE_COUNT);
-	shipTextures.emplace_back("./Assets/Ship1.png");
-	shipTextures.emplace_back("./Assets/Ship2.png");
-	shipTextures.emplace_back("./Assets/Ship3.png");
-
-	if(!alienTexture.IsLoaded() || !wallTexture.IsLoaded() || !projectileTexture.IsLoaded()) {
-		throw std::runtime_error("Failed to load one or more textures.");
+	res.alienTexture = ResourceHandle<Texture2D>("./Assets/Alien.png");
+	if (!res.alienTexture.IsLoaded()) {
+		TraceLog(LOG_ERROR, "Failed to load Alien.png");
+		return std::nullopt;
 	}
 
-	for (const auto& shipTexture : shipTextures) {
-		if(!shipTexture.IsLoaded()) {
-			throw std::runtime_error("Failed to load ship texture.");
-		}
+	res.wallTexture = ResourceHandle<Texture2D>("./Assets/Barrier.png");
+	if (!res.wallTexture.IsLoaded()) {
+		TraceLog(LOG_ERROR, "Failed to load Barrier.png");
+		return std::nullopt;
 	}
+
+	res.projectileTexture = ResourceHandle<Texture2D>("./Assets/Laser.png");
+	if (!res.projectileTexture.IsLoaded()) {
+		TraceLog(LOG_ERROR, "Failed to load Laser.png");
+		return std::nullopt;
+	}
+
+	res.shipTextures.reserve(GameConstants::Player::Rendering::TEXTURE_COUNT);
+	res.shipTextures.emplace_back("./Assets/Ship1.png");
+	if (!res.shipTextures.back().IsLoaded()) {
+		TraceLog(LOG_ERROR, "Failed to load Ship1.png");
+		return std::nullopt;
+	}
+
+	res.shipTextures.emplace_back("./Assets/Ship2.png");
+	if (!res.shipTextures.back().IsLoaded()) {
+		TraceLog(LOG_ERROR, "Failed to load Ship2.png");
+		return std::nullopt;
+	}
+
+	res.shipTextures.emplace_back("./Assets/Ship3.png");
+	if (!res.shipTextures.back().IsLoaded()) {
+		TraceLog(LOG_ERROR, "Failed to load Ship3.png");
+		return std::nullopt;
+	}
+
+	return res;
 }
 
-Texture2D Resources::GetShipTexture(size_t index) const {
+Texture2D Resources::GetShipTexture(size_t index) const  noexcept{
 	if (index >= shipTextures.size()) {
-		throw std::out_of_range("Ship texture index out of range.");
+		TraceLog(LOG_ERROR, "Ship texture index out of bounds: %zu", index);
+		return shipTextures[0].Get();
 	}
 	return shipTextures[index].Get();
 }

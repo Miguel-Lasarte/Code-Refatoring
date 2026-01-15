@@ -15,6 +15,9 @@ struct ResourceTraits<Texture2D> {
     static Texture2D Default() {
         return Texture2D{};
     }
+    static bool IsValid(const Texture2D& resource) {
+        return resource.id != 0;
+    }
 };
 
 template<>
@@ -28,6 +31,9 @@ struct ResourceTraits<Sound> {
     static Sound Default() {
         return Sound{};
     }
+    static bool IsValid(const Sound& resource) {
+		return resource.frameCount != 0;
+    }
 };
 
 template<typename T>
@@ -40,7 +46,10 @@ public:
 
     explicit ResourceHandle(const char* filePath) {
         resource = ResourceTraits<T>::Load(filePath);
-        isLoaded = true;
+        isLoaded = ResourceTraits<T>::IsValid(resource);
+        if(!isLoaded) {
+            resource = ResourceTraits<T>::Default();
+		}
     }
 
     ~ResourceHandle() {
