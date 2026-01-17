@@ -3,6 +3,13 @@
 Wall::Wall(Vector2 pos) : position(pos) {
 }
 
+void Wall::Update()
+{
+	if (health < 1)
+	{
+		active = false;
+	}
+}
 
 void Wall::Render(const Resources& resources) const
 {
@@ -33,16 +40,7 @@ void Wall::Render(const Resources& resources) const
 	);
 }
 
-void Wall::Update()
-{
 
-	if (health < 1)
-	{
-		active = false;
-	}
-
-
-}
 
 void Wall::TakeDamage() noexcept
 {

@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <algorithm>
 
 Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 }
@@ -6,7 +7,6 @@ Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 void Player::Update()
 {
 	using namespace GameConstants::Player;
-	direction = 0;
 	if (IsKeyDown(KEY_LEFT)) direction--;
 
 	if (IsKeyDown(KEY_RIGHT)) direction++;
@@ -15,9 +15,7 @@ void Player::Update()
 
 	const float minX = RADIUS;
 	const float maxX = static_cast<float>(GetScreenWidth()) - RADIUS;
-
-	if (xPos < minX) xPos = minX;
-	else if (xPos > maxX) xPos = maxX;
+	xPos = std::clamp(xPos, minX, maxX);
 
 	timer += GetFrameTime();
 	if (timer >= Animation::INTERVAL)
