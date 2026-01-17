@@ -1,32 +1,37 @@
 #pragma once
 #include "raylib.h"
+#include <string_view>
+#include <stdexcept>
 
 template<typename T>
 struct ResourceTraits;
 
 template<>
 struct ResourceTraits<Texture2D> {
-	static Texture2D Load(const char* filePath) {
-		return LoadTexture(filePath);
+	static Texture2D Load(std::string_view filePath) {
+		Texture2D texture = LoadTexture(filePath.data());
+		if(texture.id == 0) {
+			throw std::runtime_error("Failed to load texture: " + std::string(filePath));
+		}
+		return texture;
+
 	}
 	static void Unload(Texture2D resource) {
 		UnloadTexture(resource);
-	}
-	static Texture2D Default() {
-		return Texture2D{};
 	}
 };
 
 template<>
 struct ResourceTraits<Sound> {
-	static Sound Load(const char* filePath) {
-		return LoadSound(filePath);
+	static Sound Load(std::string_view filePath) {
+		Sound sound = LoadSound(filePath.data());
+		if(sound.frameCount == 0) {
+			throw std::runtime_error("Failed to load sound: " + std::string(filePath));
+		}
+		return sound;
 	}
 	static void Unload(Sound resource) {
 		UnloadSound(resource);
-	}
-	static Sound Default() {
-		return Sound{};
 	}
 };
 
@@ -36,7 +41,7 @@ class ResourceHandle {
 
 public:
 
-	ResourceHandle(const char* filePath) {
+	explicit ResourceHandle(std::string_view filePath) {
 		resource = ResourceTraits<T>::Load(filePath);
 
 	}
