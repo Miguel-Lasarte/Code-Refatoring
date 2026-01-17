@@ -3,8 +3,7 @@
 #include <vector>
 #include "Constants.h"
 #include "ResourceHandle.h"
-#include <stdexcept>
-#include <optional>
+
 
 
 class Resources

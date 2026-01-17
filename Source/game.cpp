@@ -1,8 +1,6 @@
 #include "game.h"
 #include <iostream>
 #include <vector>
-#include <chrono>
-#include <thread>
 #include <fstream>
 #include <algorithm>
 

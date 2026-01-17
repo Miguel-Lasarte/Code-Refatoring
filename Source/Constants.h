@@ -35,7 +35,6 @@ namespace GameConstants
 	namespace Projectile {
 
 		constexpr int SPEED = 15;
-		constexpr float LENGTH = 15.0f;
 		constexpr int OUT_OF_BOUNDS = 1500;
 
 		namespace Rendering {
@@ -160,13 +159,6 @@ namespace GameConstants
 			constexpr int START_Y = 140;
 			constexpr int NAME_X = 50;
 			constexpr int SCORE_X = 350;
-		}
-	}
-
-	namespace Physics {
-		namespace Collision
-		{
-			constexpr float BUFFER = 0.1f;
 		}
 	}
 

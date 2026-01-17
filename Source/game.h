@@ -5,7 +5,6 @@
 #include <string>
 #include "Constants.h"
 #include "CollisionSystem.h"
-#include <optional>
 #include "Player.h"
 #include "Projectiles.h"
 #include "Wall.h"
@@ -47,8 +46,6 @@ private:
 	std::vector<Projectile> playerProjectiles;
 
 	std::vector<Projectile> alienProjectiles;
-
-	std::vector<Projectile> projectiles;
 
 	std::vector<Wall> walls;
 
