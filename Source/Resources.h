@@ -17,6 +17,9 @@ class Resources
 public:
 	Resources();
 	Resources(const Resources&) = delete;
+	Resources& operator=(const Resources&) = delete;
+	Resources(Resources&&) = default;  
+	Resources& operator=(Resources&&) = default;  
 	~Resources() = default;
 
 	[[nodiscard]] const Texture2D& GetAlienTexture() const noexcept {

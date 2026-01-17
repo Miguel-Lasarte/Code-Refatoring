@@ -13,6 +13,10 @@ struct Window {
 	~Window() {
 		CloseWindow();
 	}
+	Window(const Window&) = delete;
+	Window& operator=(const Window&) = delete;
+	Window(Window&&) = delete;
+	Window& operator=(Window&&) = delete;
 };
 
 struct Audio
@@ -26,4 +30,8 @@ struct Audio
 	~Audio() {
 		CloseAudioDevice();
 	}
+	Audio(const Audio&) = delete;
+	Audio& operator=(const Audio&) = delete;
+	Audio(Audio&&) = delete;
+	Audio& operator=(Audio&&) = delete;
 };

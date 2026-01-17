@@ -50,12 +50,28 @@ public:
 		ResourceTraits<T>::Unload(resource);
 	}
 
+	ResourceHandle(ResourceHandle&& other) noexcept
+		: resource(other.resource) {
+		other.resource = T{};
+	}
+
+	ResourceHandle& operator=(ResourceHandle&& other) noexcept {
+		if (this != &other) {
+			ResourceTraits<T>::Unload(resource);
+			resource = other.resource;
+			other.resource = T{};
+		}
+		return *this;
+	}
+
+	ResourceHandle(const ResourceHandle&) = delete;
+	ResourceHandle& operator=(const ResourceHandle&) = delete;
 
 	[[nodiscard]] const T& Get() const noexcept {
 		return resource;
 	}
 
-	operator T() const noexcept {
+	operator T&() const noexcept {
 		return resource;
 	}
 };
