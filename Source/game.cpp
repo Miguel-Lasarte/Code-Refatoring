@@ -309,11 +309,10 @@ void Game::CheckPlayerProjectileCollisions()
 		for (auto& alien : aliens) {
 			if (!alien.IsActive()) continue;
 
-			if (CollisionSystem::CheckCollision(
+			if (CollisionSystem::CheckCirclePointCollision(
 				alien.GetPosition(),
 				GameConstants::Alien::RADIUS,
-				projectile.GetLineStart(),
-				projectile.GetLineEnd()
+				projectile.GetPosition()
 			)) {
 				projectile.SetInactive();
 				alien.SetInactive();
@@ -331,11 +330,10 @@ void Game::CheckAlienProjectileCollisions()
 	for (auto& proj : alienProjectiles) {
 		if (!proj.IsActive()) continue;
 
-		if (CollisionSystem::CheckCollision(
+		if (CollisionSystem::CheckCirclePointCollision(
 			playerPosition,
 			GameConstants::Player::RADIUS,
-			proj.GetLineStart(),
-			proj.GetLineEnd()
+			proj.GetPosition()
 		)) {
 			proj.SetInactive();
 			player.lives -= 1;
@@ -351,11 +349,10 @@ void Game::CheckWallCollisions() {
 		for (auto& wall : walls) {
 			if (!wall.IsActive()) continue;
 
-			if (CollisionSystem::CheckCollision(
+			if (CollisionSystem::CheckCirclePointCollision(
 				wall.GetPosition(),
 				GameConstants::Wall::RADIUS,
-				proj.GetLineStart(),
-				proj.GetLineEnd()
+				proj.GetPosition()
 			)) {
 				wall.TakeDamage();
 				proj.SetInactive();
@@ -370,11 +367,10 @@ void Game::CheckWallCollisions() {
 		for (auto& wall : walls) {
 			if (!wall.IsActive()) continue;
 
-			if (CollisionSystem::CheckCollision(
+			if (CollisionSystem::CheckCirclePointCollision(
 				wall.GetPosition(),
 				GameConstants::Wall::RADIUS,
-				proj.GetLineStart(),
-				proj.GetLineEnd()
+				proj.GetPosition()
 			)) {
 				wall.TakeDamage();
 				proj.SetInactive();

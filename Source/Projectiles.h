@@ -8,8 +8,7 @@ private:
 	Vector2 position = { 0.f,0.f };
 	bool active = true;
 	int speed;
-	Vector2 lineStart = { 0, 0 };
-	Vector2 lineEnd = { 0, 0 };
+	
 
 public:
 
@@ -18,8 +17,8 @@ public:
 	void Render(const Resources& resources) const;
 
 	[[nodiscard]] bool IsActive() const noexcept { return active; }
-	[[nodiscard]] Vector2 GetLineStart() const noexcept { return lineStart; }
-	[[nodiscard]] Vector2 GetLineEnd() const noexcept { return lineEnd; }
+	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
+
 
 	void SetInactive() noexcept { active = false; }
 };
