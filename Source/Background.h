@@ -12,7 +12,7 @@ private:
 	float size = 0.f;
 public:
 	Star(Vector2 pos, float size);
-	void Update(float fffset);
+	void Update(float offset);
 	void Render() const;
 };
 

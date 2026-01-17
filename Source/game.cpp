@@ -1,6 +1,4 @@
 #include "game.h"
-#include <iostream>
-#include <vector>
 #include <fstream>
 #include <algorithm>
 #include <random>
@@ -268,7 +266,7 @@ void Game::SpawnAliens()
 {
 	using namespace GameConstants::Formation;
 	aliens.clear();
-	aliens.reserve(static_cast<std::vector<Alien, std::allocator<Alien>>::size_type>(WIDTH) * HEIGHT);
+	aliens.reserve(WIDTH * HEIGHT);
 
 	for (int row = 0; row < HEIGHT; ++row) {
 		for (int col = 0; col < WIDTH; ++col) {

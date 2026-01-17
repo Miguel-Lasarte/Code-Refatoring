@@ -71,7 +71,7 @@ public:
 		return resource;
 	}
 
-	operator T&() const noexcept {
+	operator const T&() const noexcept {
 		return resource;
 	}
 };
