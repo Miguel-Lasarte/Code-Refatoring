@@ -15,12 +15,7 @@ int main()
 		);
 		SetTargetFPS(GameConstants::Screen::TARGET_FPS);
 		Audio audio;
-
-
-
 		Game game;
-
-
 		while (!WindowShouldClose())
 		{
 			game.Update();
@@ -31,7 +26,6 @@ int main()
 			EndDrawing();
 		}
 	}
-
 	catch (...) {
 		TraceLog(LOG_ERROR, "Unknown error occurred");
 

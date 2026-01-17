@@ -38,6 +38,7 @@ void Game::InitializeNewGame()
 	score = 0;
 	shootTimer = 0;
 	projectiles.clear();
+
 	walls.clear();
 	aliens.clear();
 	SpawnAliens();
@@ -186,16 +187,19 @@ void Game::SpawnPlayerProjectile()
 			player.GetXPos(),
 			static_cast<float>(GetScreenHeight()) - GameConstants::Player::Shooting::SPAWN_Y_OFFSET
 	};
-	projectiles.emplace_back(startPos, EntityType::PLAYER_PROJECTILE);
+	playerProjectiles.emplace_back(startPos, GameConstants::Projectile::SPEED);
 }
 
 void Game::UpdateEntities() {
-	std::for_each(projectiles.begin(), projectiles.end(), [](auto& proj) {
+	for (auto& proj : playerProjectiles) {
 		proj.Update();
-		});
-	std::for_each(walls.begin(), walls.end(), [](auto& wall) {
+	}
+	for (auto& proj : alienProjectiles) {
+		proj.Update();
+	}
+	for (auto& wall : walls) {
 		wall.Update();
-		});
+	}
 }
 
 void Game::UpdateBackground() {
@@ -225,11 +229,10 @@ void Game::LoseConditions()
 
 void Game::RemoveInactiveEntities() {
 
-	auto removeInactive = [](const auto& entity) { return !entity.IsActive(); };
-
-	std::erase_if(projectiles, removeInactive);
-	std::erase_if(aliens, removeInactive);
-	std::erase_if(walls, removeInactive);
+	std::erase_if(playerProjectiles, [](const auto& p) { return !p.IsActive(); });
+	std::erase_if(alienProjectiles, [](const auto& p) { return !p.IsActive(); });
+	std::erase_if(aliens, [](const auto& a) { return !a.IsActive(); });
+	std::erase_if(walls, [](const auto& w) { return !w.IsActive(); });
 };
 
 void Game::AlienShooting() {
@@ -244,7 +247,7 @@ void Game::AlienShooting() {
 		}
 		Vector2 shootPos = aliens[randomAlienIndex].GetPosition();
 		shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
-		projectiles.emplace_back(shootPos, EntityType::ALIEN_PROJECTILE, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
+		alienProjectiles.emplace_back(shootPos, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
 		shootTimer = 0;
 	}
 }
@@ -300,67 +303,87 @@ void Game::CheckGameCollisions()
 
 void Game::CheckPlayerProjectileCollisions()
 {
-	std::for_each(projectiles.begin(), projectiles.end(), [this](auto& projectile) {
-		if (projectile.GetType() != EntityType::PLAYER_PROJECTILE || !projectile.IsActive())
-			return;
+	for (auto& projectile : playerProjectiles) {
+		if (!projectile.IsActive()) continue;
 
-		auto alienHit = std::find_if(aliens.begin(), aliens.end(), [&](auto& alien) {
-			return alien.IsActive() &&
-				CollisionSystem::CheckCollision(
-					alien.GetPosition(),
-					GameConstants::Alien::RADIUS,
-					projectile.GetLineStart(),
-					projectile.GetLineEnd()
-				);
-			});
-		if (alienHit != aliens.end()) {
-			projectile.SetInactive();
-			alienHit->SetInactive();
-			score += GameConstants::Scoring::POINTS_PER_ALIEN;
+		for (auto& alien : aliens) {
+			if (!alien.IsActive()) continue;
+
+			if (CollisionSystem::CheckCollision(
+				alien.GetPosition(),
+				GameConstants::Alien::RADIUS,
+				projectile.GetLineStart(),
+				projectile.GetLineEnd()
+			)) {
+				projectile.SetInactive();
+				alien.SetInactive();
+				score += GameConstants::Scoring::POINTS_PER_ALIEN;
+				break;
+			}
 		}
-		});
+	}
 }
 
 void Game::CheckAlienProjectileCollisions()
 {
-	const Vector2 playerPosition = { player.GetXPos(), static_cast<float>(GetScreenHeight()) - GameConstants::Player::BASE_HEIGHT };
+	const Vector2 playerPosition = player.GetPosition();
 
-	auto projectileHit = std::find_if(projectiles.begin(), projectiles.end(), [&](auto& proj) {
-		return proj.GetType() == EntityType::ALIEN_PROJECTILE &&
-			proj.IsActive() &&
-			CollisionSystem::CheckCollision(
-				playerPosition,
-				GameConstants::Player::RADIUS,
-				proj.GetLineStart(),
-				proj.GetLineEnd()
-			);
-		});
-	if (projectileHit != projectiles.end())
-	{
-		projectileHit->SetInactive();
-		player.lives -= 1;
+	for (auto& proj : alienProjectiles) {
+		if (!proj.IsActive()) continue;
+
+		if (CollisionSystem::CheckCollision(
+			playerPosition,
+			GameConstants::Player::RADIUS,
+			proj.GetLineStart(),
+			proj.GetLineEnd()
+		)) {
+			proj.SetInactive();
+			player.lives -= 1;
+			break;
+		}
 	}
 }
 
 void Game::CheckWallCollisions() {
-	std::for_each(projectiles.begin(), projectiles.end(), [&](Projectile& proj) {
-		if (!proj.IsActive()) return;
-		auto wallHit = std::find_if(walls.begin(), walls.end(), [&](Wall& wall) {
-			return wall.IsActive() &&
-				CollisionSystem::CheckCollision(
-					wall.GetPosition(),
-					GameConstants::Wall::RADIUS,
-					proj.GetLineStart(),
-					proj.GetLineEnd()
-				);
-			});
-		if (wallHit != walls.end())
-		{
-			wallHit->TakeDamage();
-			proj.SetInactive();
+	for (auto& proj : playerProjectiles) {
+		if (!proj.IsActive()) continue;
+
+		for (auto& wall : walls) {
+			if (!wall.IsActive()) continue;
+
+			if (CollisionSystem::CheckCollision(
+				wall.GetPosition(),
+				GameConstants::Wall::RADIUS,
+				proj.GetLineStart(),
+				proj.GetLineEnd()
+			)) {
+				wall.TakeDamage();
+				proj.SetInactive();
+				break;
+			}
 		}
-		});
+	}
+
+	for (auto& proj : alienProjectiles) {
+		if (!proj.IsActive()) continue;
+
+		for (auto& wall : walls) {
+			if (!wall.IsActive()) continue;
+
+			if (CollisionSystem::CheckCollision(
+				wall.GetPosition(),
+				GameConstants::Wall::RADIUS,
+				proj.GetLineStart(),
+				proj.GetLineEnd()
+			)) {
+				wall.TakeDamage();
+				proj.SetInactive();
+				break;
+			}
+		}
+	}
 }
+
 
 void Game::Render() const
 {
@@ -403,16 +426,18 @@ void Game::RenderGameplay() const {
 
 	player.Render(resources);
 
-
-	std::for_each(projectiles.begin(), projectiles.end(), [&](const auto& proj) {
+	for (const auto& proj : playerProjectiles) {
 		proj.Render(resources);
-		});
-	std::for_each(walls.begin(), walls.end(), [&](const auto& wall) {
+	}
+	for (const auto& proj : alienProjectiles) {
+		proj.Render(resources);
+	}
+	for (const auto& wall : walls) {
 		wall.Render(resources);
-		});
-	std::for_each(aliens.begin(), aliens.end(), [&](const auto& alien) {
+	}
+	for (const auto& alien : aliens) {
 		alien.Render(resources);
-		});
+	}
 }
 
 void Game::RenderEnd() const {

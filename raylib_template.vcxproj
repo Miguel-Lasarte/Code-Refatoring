@@ -167,21 +167,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Alien.cpp" />
     <ClCompile Include="Source\Background.cpp" />
     <ClCompile Include="Source\CollisionSystem.cpp" />
-    <ClCompile Include="Source\Entity.cpp" />
     <ClCompile Include="Source\game.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\Projectiles.cpp" />
     <ClCompile Include="Source\Resources.cpp" />
+    <ClCompile Include="Source\Wall.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Alien.h" />
+    <ClInclude Include="Source\Background.h" />
     <ClInclude Include="Source\CollisionSystem.h" />
     <ClInclude Include="Source\Constants.h" />
     <ClInclude Include="Source\game.h" />
+    <ClInclude Include="Source\Player.h" />
+    <ClInclude Include="Source\Projectiles.h" />
     <ClInclude Include="Source\ResourceHandle.h" />
     <ClInclude Include="Source\Resources.h" />
     <ClInclude Include="Source\SystemHandle.h" />
+    <ClInclude Include="Source\Wall.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

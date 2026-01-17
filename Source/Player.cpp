@@ -1,4 +1,4 @@
-#include "game.h"
+#include "Player.h"
 
 Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 }
