@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 
 namespace GameConstants
 {
@@ -170,6 +171,6 @@ namespace GameConstants
 	}
 
 	namespace Files {
-		constexpr const char* LEADERBOARD_PATH = "./leaderboard.txt";
+		constexpr std::string_view LEADERBOARD_PATH = "./leaderboard.txt";
 	}
 }

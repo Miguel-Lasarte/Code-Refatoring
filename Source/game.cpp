@@ -561,7 +561,7 @@ void Game::InsertNewHighScore(const std::string& playerName)
 
 void Game::LoadLeaderboard()
 {
-	std::ifstream file(GameConstants::Files::LEADERBOARD_PATH);
+	std::ifstream file(GameConstants::Files::LEADERBOARD_PATH.data());
 	if (!file.is_open()) return;
 
 	leaderboard.clear();
@@ -582,7 +582,7 @@ void Game::LoadLeaderboard()
 void Game::SaveLeaderboard()
 {
 	try {
-		std::ofstream file(GameConstants::Files::LEADERBOARD_PATH, std::ios::trunc);
+		std::ofstream file(GameConstants::Files::LEADERBOARD_PATH.data(), std::ios::trunc);
 		if (!file.is_open()) {
 			TraceLog(LOG_ERROR, "Failed to open leaderboard file for writing");
 			return;
