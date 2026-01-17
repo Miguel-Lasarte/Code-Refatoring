@@ -1,6 +1,5 @@
 #include "Resources.h"
-#pragma warning (push)
-#pragma warning(disable : 26446)
+
 
  Resources::Resources()
     : alienTexture("./Assets/Alien.png"),
@@ -16,9 +15,8 @@
 Texture2D Resources::GetShipTexture(size_t index) const  noexcept{
 	if (index >= shipTextures.size()) {
 		TraceLog(LOG_ERROR, "Ship texture index out of bounds: %zu", index);
-		return shipTextures[0].Get();
+		return shipTextures.front().Get();
 	}
-	return shipTextures[index].Get();
+    return shipTextures[index].Get();
 }
 
-#pragma warning (pop)
