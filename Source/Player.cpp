@@ -7,6 +7,7 @@ Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 void Player::Update()
 {
 	using namespace GameConstants::Player;
+	direction = 0;
 	if (IsKeyDown(KEY_LEFT)) direction--;
 
 	if (IsKeyDown(KEY_RIGHT)) direction++;
