@@ -26,6 +26,10 @@ int main()
 			EndDrawing();
 		}
 	}
+	catch (const std::exception& e) {
+		TraceLog(LOG_ERROR, "Fatal error: %s", e.what());
+		return -1;
+	}
 	catch (...) {
 		TraceLog(LOG_ERROR, "Unknown error occurred");
 
