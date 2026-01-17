@@ -54,7 +54,7 @@ private:
 
 	std::vector<Alien> aliens;
 
-	std::vector<PlayerData> leaderboard = { {"Player 1", 500}, {"Player 2", 400}, {"Player 3", 300}, {"Player 4", 200}, {"Player 5", 100} };
+	std::vector<PlayerData> leaderboard;
 
 	Background background;
 
@@ -114,11 +114,6 @@ private:
 public:
 	Game();
 	~Game() = default;
-
-	Game(const Game&) = delete;
-	Game& operator=(const Game&) = delete;
-	Game(Game&&) noexcept = default;
-	Game& operator=(Game&&) noexcept = default;
 
 	void Update();
 	void Render() const;

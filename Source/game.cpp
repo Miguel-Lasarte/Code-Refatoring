@@ -5,8 +5,7 @@
 #include <thread>
 #include <fstream>
 #include <algorithm>
-#pragma warning (push)
-#pragma warning(disable : 26446)
+
 
 namespace {
 	constexpr bool IsValidInputChar(int key) {
@@ -28,6 +27,8 @@ Game::Game()
 	, gameState(State::STARTSCREEN)
 	, score(0)
 	, player(static_cast<float>(GetScreenWidth()))
+	, leaderboard{ {"Player", 500}, {"Player", 400},
+				  {"Player", 300}, {"Player", 200}, {"Player", 100} }
 {
 	LoadLeaderboard();
 }
@@ -37,8 +38,8 @@ void Game::InitializeNewGame()
 {
 	score = 0;
 	shootTimer = 0;
-	projectiles.clear();
-
+	playerProjectiles.clear();
+	alienProjectiles.clear();
 	walls.clear();
 	aliens.clear();
 	SpawnAliens();
@@ -53,7 +54,8 @@ void Game::TransitionToGameplay()
 
 void Game::TransitionToEnd()
 {
-	projectiles.clear();
+	playerProjectiles.clear();
+	alienProjectiles.clear();
 	walls.clear();
 	aliens.clear();
 	newHighScore = CheckNewHighScore();
@@ -137,7 +139,7 @@ void Game::EntryName() {
 	{
 		SetMouseCursor(MOUSE_CURSOR_IBEAM);
 		HandleTextInput();
-		
+
 	}
 	else
 	{
@@ -214,6 +216,7 @@ void Game::LoseConditions()
 	if (player.lives < 1)
 	{
 		TransitionToEnd();
+		return;
 	}
 	for (auto& alien : aliens)
 	{
@@ -236,16 +239,12 @@ void Game::RemoveInactiveEntities() {
 };
 
 void Game::AlienShooting() {
-	shootTimer += 1;
-	if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES)
-	{
-		int randomAlienIndex = 0;
+	if (aliens.empty()) return;
 
-		if (aliens.size() > 1)
-		{
-			randomAlienIndex = rand() % aliens.size();
-		}
-		Vector2 shootPos = aliens[randomAlienIndex].GetPosition();
+	shootTimer += 1;
+	if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES) {
+		const int randomIndex = aliens.size() > 1 ? rand() % aliens.size() : 0;
+		Vector2 shootPos = aliens[randomIndex].GetPosition();
 		shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
 		alienProjectiles.emplace_back(shootPos, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
 		shootTimer = 0;
@@ -266,19 +265,20 @@ void Game::SpawnWalls()
 
 void Game::SpawnAliens()
 {
+	using namespace GameConstants::Formation;
 	aliens.clear();
-	aliens.reserve(static_cast<std::vector<Alien, std::allocator<Alien>>::size_type>(GameConstants::Formation::WIDTH) * GameConstants::Formation::HEIGHT);
+	aliens.reserve(static_cast<std::vector<Alien, std::allocator<Alien>>::size_type>(WIDTH) * HEIGHT);
 
-	for (int row = 0; row < GameConstants::Formation::HEIGHT; ++row) {
-		for (int col = 0; col < GameConstants::Formation::WIDTH; ++col) {
+	for (int row = 0; row < HEIGHT; ++row) {
+		for (int col = 0; col < WIDTH; ++col) {
 			const float x = static_cast<float>(
-				GameConstants::Formation::START_X +
-				GameConstants::Formation::OFFSET_X +
-				(col * GameConstants::Formation::SPACING)
+				START_X +
+				OFFSET_X +
+				(col * SPACING)
 				);
 			const float y = static_cast<float>(
-				GameConstants::Formation::START_Y +
-				(row * GameConstants::Formation::SPACING)
+				START_Y +
+				(row * SPACING)
 				);
 
 			aliens.emplace_back(x, y);
@@ -406,11 +406,11 @@ void Game::Render() const
 }
 
 void Game::RenderStart() const {
-	using namespace GameConstants::UI;
+	using namespace GameConstants::UI::StartScreen;
 
-	DrawText("SPACE INVADERS", StartScreen::TITLE_X, StartScreen::TITLE_Y, StartScreen::TITLE_SIZE, YELLOW);
+	DrawText("SPACE INVADERS", TITLE_X, TITLE_Y, TITLE_SIZE, YELLOW);
 
-	DrawText("PRESS SPACE TO BEGIN", StartScreen::PROMPT_X, StartScreen::PROMPT_Y, StartScreen::PROMPT_SIZE, YELLOW);
+	DrawText("PRESS SPACE TO BEGIN", PROMPT_X, PROMPT_Y, PROMPT_SIZE, YELLOW);
 
 
 }
@@ -532,12 +532,13 @@ void Game::RenderLeaderboard() const {
 
 	DrawText("LEADERBOARD", Leaderboard::TITLE_X, Leaderboard::TITLE_Y, HUD::TEXT_SIZE, YELLOW);
 
-	for (int i = 0; i < leaderboard.size(); i++)
-	{
-		const char* tempNameDisplay = leaderboard[i].name.data();
-		DrawText(tempNameDisplay, Leaderboard::NAME_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-		DrawText(TextFormat("%i", leaderboard[i].score), Leaderboard::SCORE_X, Leaderboard::START_Y + (i * Leaderboard::ROW_HEIGHT), HUD::TEXT_SIZE, YELLOW);
-	}
+	for (size_t i = 0; i < leaderboard.size(); i++) {
+        const int y = Leaderboard::START_Y + (static_cast<int>(i) * Leaderboard::ROW_HEIGHT);
+        DrawText(leaderboard[i].name.c_str(), Leaderboard::NAME_X, y, 
+                 HUD::TEXT_SIZE, YELLOW);
+        DrawText(TextFormat("%i", leaderboard[i].score), Leaderboard::SCORE_X, y, 
+                 HUD::TEXT_SIZE, YELLOW);
+    }
 }
 
 bool Game::CheckNewHighScore() const noexcept
@@ -607,4 +608,3 @@ void Game::SaveLeaderboard()
 	}
 }
 
-#pragma warning (pop)
