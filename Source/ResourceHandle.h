@@ -51,7 +51,7 @@ public:
 	}
 
 
-	[[nodiscard]] T Get() const noexcept {
+	[[nodiscard]] const T& Get() const noexcept {
 		return resource;
 	}
 

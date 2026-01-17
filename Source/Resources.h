@@ -17,20 +17,17 @@ class Resources
 public:
 	Resources();
 	Resources(const Resources&) = delete;
-	Resources& operator=(const Resources&) = delete;
-	Resources(Resources&&) noexcept = default;
-	Resources& operator=(Resources&&) noexcept = default;
 	~Resources() = default;
 
-	[[nodiscard]] Texture2D GetAlienTexture() const noexcept {
+	[[nodiscard]] const Texture2D& GetAlienTexture() const noexcept {
 		return alienTexture.Get();
 	}
-	[[nodiscard]] Texture2D GetWallTexture() const noexcept {
+	[[nodiscard]] const Texture2D& GetWallTexture() const noexcept {
 		return wallTexture.Get();
 	}
-	[[nodiscard]] Texture2D GetProjectileTexture() const noexcept {
+	[[nodiscard]] const Texture2D& GetProjectileTexture() const noexcept {
 		return projectileTexture.Get();
 	}
-    [[nodiscard]] Texture2D GetShipTexture(size_t index) const noexcept;
+    [[nodiscard]] const Texture2D& GetShipTexture(size_t index) const noexcept;
 
 };

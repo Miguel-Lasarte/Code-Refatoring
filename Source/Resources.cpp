@@ -12,7 +12,7 @@
     shipTextures.emplace_back("./Assets/Ship3.png");
 }
 
-Texture2D Resources::GetShipTexture(size_t index) const  noexcept{
+const Texture2D& Resources::GetShipTexture(size_t index) const  noexcept{
 	if (index >= shipTextures.size()) {
 		TraceLog(LOG_ERROR, "Ship texture index out of bounds: %zu", index);
 		return shipTextures.front().Get();
