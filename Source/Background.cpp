@@ -1,4 +1,4 @@
-#include "game.h"
+#include "Background.h"
 #include <algorithm>
 
 Star::Star(Vector2 pos, float size) : initPosition(pos), position(pos), size(size) {

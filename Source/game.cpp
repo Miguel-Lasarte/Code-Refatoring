@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <random>
 
 
 namespace {
@@ -241,7 +242,9 @@ void Game::AlienShooting() {
 
 	shootTimer += 1;
 	if (shootTimer > GameConstants::Alien::Shooting::INTERVAL_FRAMES) {
-		const int randomIndex = aliens.size() > 1 ? rand() % aliens.size() : 0;
+		thread_local static std::mt19937 rng(std::random_device{}());
+		std::uniform_int_distribution<size_t> dist(0, aliens.size() - 1);
+		size_t randomIndex = dist(rng);
 		Vector2 shootPos = aliens[randomIndex].GetPosition();
 		shootPos.y += GameConstants::Alien::Shooting::Y_OFFSET;
 		alienProjectiles.emplace_back(shootPos, GameConstants::Alien::Shooting::PROJECTILE_SPEED);
