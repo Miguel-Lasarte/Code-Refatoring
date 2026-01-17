@@ -13,10 +13,9 @@ class Resources
 	ResourceHandle<Texture2D> alienTexture;
 	ResourceHandle<Texture2D> wallTexture;
 	ResourceHandle<Texture2D> projectileTexture;
-	Resources() = default;
-public:
 	
-	[[nodiscard]] static std::optional<Resources> TryCreate();
+public:
+	Resources();
 	Resources(const Resources&) = delete;
 	Resources& operator=(const Resources&) = delete;
 	Resources(Resources&&) noexcept = default;

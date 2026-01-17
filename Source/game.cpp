@@ -22,24 +22,14 @@ namespace {
 	}
 }
 
-Game::Game(Resources&& res)
-	: resources(std::move(res))
+Game::Game()
+	: resources()
 	, background()
 	, gameState(State::STARTSCREEN)
 	, score(0)
 	, player(static_cast<float>(GetScreenWidth()))
 {
 	LoadLeaderboard();
-}
-
-
-std::optional<Game> Game::TryCreate() {
-	auto maybeResources = Resources::TryCreate();
-	if (!maybeResources) {
-		TraceLog(LOG_ERROR, "Failed to load game resources");
-		return std::nullopt;
-	}
-	return Game(std::move(*maybeResources));
 }
 
 

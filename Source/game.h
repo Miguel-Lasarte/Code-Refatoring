@@ -165,7 +165,7 @@ private:
 	bool mouseOnText = false;
 
 	int framesCounter = 0;
-	Game(Resources&& res);
+	
 	void InitializeNewGame();
 	void TransitionToGameplay();
 	void TransitionToEnd();
@@ -215,8 +215,7 @@ private:
 	
 
 public:
-	[[nodiscard]] static std::optional<Game> TryCreate();
-
+	Game();
 	~Game() = default;
 
 	Game(const Game&) = delete;

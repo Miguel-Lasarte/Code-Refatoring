@@ -3,65 +3,37 @@
 #include "Constants.h"
 #include "ResourceHandle.h"
 #include <exception>
+#include "SystemHandle.h"
 
 int main()
 {
 	try {
-		InitWindow(GameConstants::Screen::WIDTH, GameConstants::Screen::HEIGHT, "SPACE INVADERS");
+		Window window(
+			GameConstants::Screen::WIDTH,
+			GameConstants::Screen::HEIGHT,
+			"SPACE INVADERS"
+		);
 		SetTargetFPS(GameConstants::Screen::TARGET_FPS);
-		InitAudioDevice();
+		Audio audio;
 
-		auto maybeGame = Game::TryCreate();
-		if (!maybeGame) {
-			TraceLog(LOG_ERROR, "Failed to create game instance");
-			CloseAudioDevice();
-			CloseWindow();
-			return -1;
+
+
+		Game game;
+
+
+		while (!WindowShouldClose())
+		{
+			game.Update();
+
+			BeginDrawing();
+			ClearBackground(BLACK);
+			game.Render();
+			EndDrawing();
 		}
-
-		Game& game = *maybeGame;
-
-		try {
-			while (!WindowShouldClose())
-			{
-				game.Update();
-
-				BeginDrawing();
-				ClearBackground(BLACK);
-				game.Render();
-				EndDrawing();
-			}
-		}
-		catch (const std::exception& e) {
-			TraceLog(LOG_ERROR, "Runtime error during game loop: %s", e.what());
-		}
-
-		CloseAudioDevice();
-		CloseWindow();
-
-		return 0;
 	}
-	catch (const std::exception& e) {
-		TraceLog(LOG_FATAL, "Fatal error: %s", e.what());
 
-		if (IsAudioDeviceReady()) {
-			CloseAudioDevice();
-		}
-		if (IsWindowReady()) {
-			CloseWindow();
-		}
-
-		return -1;
-	}
 	catch (...) {
-		TraceLog(LOG_FATAL, "Unknown fatal error occurred");
-
-		if (IsAudioDeviceReady()) {
-			CloseAudioDevice();
-		}
-		if (IsWindowReady()) {
-			CloseWindow();
-		}
+		TraceLog(LOG_ERROR, "Unknown error occurred");
 
 		return -1;
 	}
