@@ -12,14 +12,6 @@
 #include "Background.h"
 
 
-enum struct State
-{
-	STARTSCREEN,
-	GAMEPLAY,
-	ENDSCREEN
-};
-
-
 struct PlayerData
 {
 	std::string name;
@@ -29,82 +21,79 @@ struct PlayerData
 class Game
 {
 private:
+	enum class State
+	{
+		STARTSCREEN,
+		GAMEPLAY,
+		ENDSCREEN
+	};
+
 	Resources resources;
-
-	State gameState = {};
-
-	int score;
-
-	int wallCount = 5;
-
-	float shootTimer = 0;
-
+	Background background;
+	State gameState = State::STARTSCREEN;
+	int score = 0;
+	int shootTimer = 0;
 	bool newHighScore = false;
 
 	Player player;
-
 	std::vector<Projectile> playerProjectiles;
-
 	std::vector<Projectile> alienProjectiles;
-
 	std::vector<Wall> walls;
-
 	std::vector<Alien> aliens;
+
+	
 
 	std::vector<PlayerData> leaderboard;
 
-	Background background;
+
 
 	std::string name = "";
 	bool mouseOnText = false;
-
 	int framesCounter = 0;
-	
-	void InitializeNewGame();
+	static constexpr int wallCount = 5;
+
 	void TransitionToGameplay();
 	void TransitionToEnd();
 	void TransitionToStart();
+
 	void SpawnAliens();
 	void SpawnWalls();
 
 	void UpdateStart();
 	void UpdateGameplay();
 	void UpdateEnd();
+
 	void ProcessGameLogic();
 	void HandlePlayerInput();
 	void UpdateEntities();
-	void UpdateBackground();
 	void LoseConditions();
 	void RemoveInactiveEntities();
 	void AlienShooting();
 	void SpawnNewWave();
 	void SpawnPlayerProjectile();
 
+	void CheckGameCollisions();
+	void CheckPlayerProjectileVsAlien();
+	void CheckAlienProjectileVsPlayer();
+	void CheckProjectileVsWall(std::vector<Projectile>& projectiles);
+
 	void EntryName();
 	void HandleTextInput();
 
-	void CheckGameCollisions();
-	void CheckPlayerProjectileCollisions();
-	void CheckAlienProjectileCollisions();
-	void CheckWallCollisions();
+
+	bool CheckNewHighScore() const noexcept;
+	void InsertNewHighScore(const std::string& playerName);
+	void LoadLeaderboard();
+	void SaveLeaderboard();
 
 	void RenderStart() const;
 	void RenderGameplay() const;
 	void RenderEnd() const;
-	void DrawTextbox() const;
-	void DrawNameText() const;
-	void DrawCharacterCount() const;
-	void DrawCursor() const;
-	void DrawContinuePrompt() const;
-	void RenderEntryName() const;
+	void RenderNameEntry() const;
 	void RenderLeaderboard() const;
-	void DrawNameInputBox() const;
 
-	bool CheckNewHighScore() const noexcept;
 
-	void InsertNewHighScore(const std::string& playerName);
-	void LoadLeaderboard();
-	void SaveLeaderboard();
+	
 
 	
 
