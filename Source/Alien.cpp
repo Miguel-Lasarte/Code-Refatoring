@@ -21,7 +21,7 @@ void Alien::Update()
 	{
 		position.x -= SPEED;
 
-		if (position.x <= 0)
+		if (position.x <= 0.f)
 		{
 			moveRight = true;
 			position.y += DROP_DISTANCE;

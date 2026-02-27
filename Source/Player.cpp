@@ -7,15 +7,15 @@ Player::Player(float screenWidth) : xPos(screenWidth / 2.0f) {
 void Player::Update()
 {
 	using namespace GameConstants::Player;
-	direction = 0;
+	int direction = 0;
 	if (IsKeyDown(KEY_LEFT)) direction--;
 
 	if (IsKeyDown(KEY_RIGHT)) direction++;
 
 	xPos += SPEED * static_cast<float>(direction);
 
-	const float minX = RADIUS;
-	const float maxX = static_cast<float>(GetScreenWidth()) - RADIUS;
+	const float minX = HALF_WIDTH;
+	const float maxX = static_cast<float>(GetScreenWidth()) - HALF_WIDTH;
 	xPos = std::clamp(xPos, minX, maxX);
 
 	timer += GetFrameTime();
@@ -45,4 +45,10 @@ void Player::Render(const Resources& resources) const
 		}, { Rendering::TEXTURE_OFFSET , Rendering::TEXTURE_OFFSET },
 		0,
 		WHITE);
+}
+
+bool Player::TakeDamage() noexcept
+{
+	lives--;
+	return lives > 0;
 }

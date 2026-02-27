@@ -17,5 +17,12 @@ public:
 
 	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
 	[[nodiscard]] bool IsActive() const noexcept { return active; }
+	[[nodiscard]] Rectangle GetBounds()   const noexcept
+	{
+		using namespace GameConstants::Alien;
+		return { position.x - HALF_WIDTH, position.y - HALF_HEIGHT,
+				 HALF_WIDTH * 2.f, HALF_HEIGHT * 2.f };
+	}
+
 	void SetInactive() noexcept { active = false; }
 };

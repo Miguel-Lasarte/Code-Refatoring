@@ -18,6 +18,12 @@ public:
 
 	[[nodiscard]] bool IsActive() const noexcept { return active; }
 	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
+	[[nodiscard]] Rectangle GetBounds()   const noexcept
+	{
+		using namespace GameConstants::Projectile;
+		return { position.x - HALF_WIDTH, position.y - HALF_HEIGHT,
+				 HALF_WIDTH * 2.f, HALF_HEIGHT * 2.f };
+	}
 
 
 	void SetInactive() noexcept { active = false; }

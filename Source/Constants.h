@@ -12,7 +12,8 @@ namespace GameConstants
 	namespace Player
 	{
 		constexpr float BASE_HEIGHT = 70.0f;
-		constexpr float RADIUS = 50.0f;
+		constexpr float HALF_WIDTH = 50.0f;   
+		constexpr float HALF_HEIGHT = 50.0f;
 		constexpr float SPEED = 7.0f;
 		constexpr int INITIAL_LIVES = 3;
 
@@ -36,6 +37,8 @@ namespace GameConstants
 
 		constexpr int SPEED = 15;
 		constexpr int OUT_OF_BOUNDS = 1500;
+		constexpr float HALF_WIDTH = 10.0f;
+		constexpr float HALF_HEIGHT = 10.0f;
 
 		namespace Rendering {
 
@@ -47,7 +50,8 @@ namespace GameConstants
 	namespace Wall {
 
 		constexpr int INITIAL_HEALTH = 50;
-		constexpr int RADIUS = 60;
+		constexpr float HALF_WIDTH = 60.0f;
+		constexpr float HALF_HEIGHT = 60.0f;
 		constexpr float Y_OFFSET = 250.0f;
 
 		namespace Rendering
@@ -67,7 +71,8 @@ namespace GameConstants
 	}
 	namespace Alien {
 		constexpr int SPEED = 2;
-		constexpr float RADIUS = 30.0f;
+		constexpr float HALF_WIDTH = 30.0f;
+		constexpr float HALF_HEIGHT = 30.0f;
 		constexpr int DROP_DISTANCE = 50;
 
 		namespace Rendering {
@@ -97,7 +102,7 @@ namespace GameConstants
 	namespace Background
 	{
 		constexpr int STAR_COUNT = 600;
-		constexpr float PARALLAX_SPEED = 15.0f;
+		constexpr float PARALLAX_SPEED = 0.05f;
 
 		namespace Stars {
 			constexpr int MIN_SIZE = 1;

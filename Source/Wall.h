@@ -12,11 +12,15 @@ public:
 
 	explicit Wall(Vector2 pos);
 
-	void Update();
 	void Render(const Resources& resources) const;
 
-	[[nodiscard]] Vector2 GetPosition() const noexcept { return position; }
 	[[nodiscard]] bool IsActive() const noexcept { return active; }
+	[[nodiscard]] Rectangle GetBounds() const noexcept
+	{
+		using namespace GameConstants::Wall;
+		return { position.x - HALF_WIDTH, position.y - HALF_HEIGHT,
+				 HALF_WIDTH * 2.f, HALF_HEIGHT * 2.f };
+	}
 
 	void TakeDamage() noexcept;
 };
