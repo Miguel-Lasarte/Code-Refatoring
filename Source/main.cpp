@@ -14,7 +14,7 @@ int main()
 			"SPACE INVADERS"
 		);
 		SetTargetFPS(GameConstants::Screen::TARGET_FPS);
-		Audio audio;
+		AudioDevice audio;
 		Game game;
 		while (!WindowShouldClose())
 		{

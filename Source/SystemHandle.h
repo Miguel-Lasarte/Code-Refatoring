@@ -11,7 +11,7 @@ struct Window {
 			throw std::runtime_error("Failed to initialize window");
 		}
 	}
-	~Window() {
+	~Window() noexcept {
 		CloseWindow();
 	}
 	Window(const Window&) = delete;
@@ -20,19 +20,19 @@ struct Window {
 	Window& operator=(Window&&) = delete;
 };
 
-struct Audio
+struct AudioDevice
 {
-	Audio() {
+	AudioDevice() {
 		InitAudioDevice();
 		if(!IsAudioDeviceReady()) {
 			throw std::runtime_error("Failed to initialize audio device");
 		}
 	}
-	~Audio() {
+	~AudioDevice() noexcept{
 		CloseAudioDevice();
 	}
-	Audio(const Audio&) = delete;
-	Audio& operator=(const Audio&) = delete;
-	Audio(Audio&&) = delete;
-	Audio& operator=(Audio&&) = delete;
+	AudioDevice(const AudioDevice&) = delete;
+	AudioDevice& operator=(const AudioDevice&) = delete;
+	AudioDevice(AudioDevice&&) = delete;
+	AudioDevice& operator=(AudioDevice&&) = delete;
 };

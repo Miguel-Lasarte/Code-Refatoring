@@ -10,7 +10,7 @@ template<>
 struct ResourceTraits<Texture2D> {
 	static Texture2D Load(std::string_view filePath) {
 		Texture2D texture = LoadTexture(filePath.data());
-		if(texture.id == 0) {
+		if (texture.id == 0) {
 			throw std::runtime_error("Failed to load texture: " + std::string(filePath));
 		}
 		return texture;
@@ -25,7 +25,7 @@ template<>
 struct ResourceTraits<Sound> {
 	static Sound Load(std::string_view filePath) {
 		Sound sound = LoadSound(filePath.data());
-		if(sound.frameCount == 0) {
+		if (sound.frameCount == 0) {
 			throw std::runtime_error("Failed to load sound: " + std::string(filePath));
 		}
 		return sound;
@@ -41,9 +41,9 @@ class ResourceHandle {
 
 public:
 
-	explicit ResourceHandle(std::string_view filePath) {
-		resource = ResourceTraits<T>::Load(filePath);
-
+	explicit ResourceHandle(std::string_view filePath)
+		: resource(ResourceTraits<T>::Load(filePath))
+	{
 	}
 
 	~ResourceHandle() {
@@ -59,7 +59,7 @@ public:
 		return resource;
 	}
 
-	operator const T&() const noexcept {
+	operator const T& () const noexcept {
 		return resource;
 	}
-};
+};	
