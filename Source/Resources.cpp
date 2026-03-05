@@ -10,12 +10,9 @@ Resources::Resources()
 {
 }
 
-const Texture2D& Resources::GetShipTexture(std::size_t index) const noexcept
+const Texture2D& Resources::GetShipTexture(std::size_t index) const 
 {
 	if (index >= shipTextures.size())
-	{
-		TraceLog(LOG_ERROR, "Ship texture index out of bounds: %zu", index);
-		return shipTextures[0].Get();
-	}
+		throw std::out_of_range("Ship texture index out of bounds: " + std::to_string(index));
 	return shipTextures[index].Get();
 }

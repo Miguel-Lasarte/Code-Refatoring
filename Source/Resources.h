@@ -29,6 +29,6 @@ public:
 	[[nodiscard]] const Texture2D& GetProjectileTexture() const noexcept {
 		return projectileTexture.Get();
 	}
-    [[nodiscard]] const Texture2D& GetShipTexture(std::size_t index) const noexcept;
+    [[nodiscard]] const Texture2D& GetShipTexture(std::size_t index) const;
 
 };
